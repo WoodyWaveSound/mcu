@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "*.h": "c"
+    },
+    "C_Cpp.doxygen.generateOnType": true,
+    "C_Cpp.doxygen.generatedStyle": "/**",
+    "C_Cpp.doxygen.sectionTags": [
+        "attention",
+        "tparam",
+        "param",
+        "result",
+        "returns",
+        "retval",
+        "exception",
+        "deprecated",
+        "warning",
+        "note"
+    ]
+}

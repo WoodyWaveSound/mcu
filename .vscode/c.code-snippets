@@ -1,0 +1,17 @@
+{
+    "Header Guard": {
+        "prefix": "hg",
+        "body": [
+            "#ifndef ___WWS_${TM_FILENAME_BASE/(.*)/${1:/upcase}/g}_H___",
+            "#define ___WWS_${TM_FILENAME_BASE/(.*)/${1:/upcase}/g}_H___",
+            "",
+            "$0",
+            "",
+            "#endif /* ___WWS_${TM_FILENAME_BASE/(.*)/${1:/upcase}/g}_H___ */"
+        ]
+    },
+    "Doxygen comment": {
+        "prefix": "/",
+        "body": "/** $0 */"
+    }
+}
