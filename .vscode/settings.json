@@ -1,6 +1,7 @@
 {
     "files.associations": {
-        "*.h": "c"
+        "*.h": "c",
+        "*.code-snippets": "json"
     },
     "C_Cpp.doxygen.generateOnType": true,
     "C_Cpp.doxygen.generatedStyle": "/**",

@@ -1,3 +1,9 @@
+/**
+ * MCU Framework and library
+ *
+ * Copyright (c) Woody Wave Sound and contributors. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
 #ifndef ___WWS_BITMASK_H___
 #define ___WWS_BITMASK_H___
 
@@ -6,7 +12,7 @@
  * @param _first first bit position
  * @param _last last bit position
  */
-#define wws_new_bitmask(_first, _last)                                         \
+#define wws_new_bitmask(_first, _last)                                                             \
   ((0xFFFFFFFFU << (_first)) & (0xFFFFFFFFU >> (31U - (_last))))
 
 /**
@@ -20,8 +26,7 @@
  * @param _bitmask bitmask
  * @param _compare mask to compare
  */
-#define wws_bitmask_every(_bitmask, _compare)                                  \
-  (((_bitmask) & (_mask)) == (_mask))
+#define wws_bitmask_every(_bitmask, _compare) (((_bitmask) & (_mask)) == (_mask))
 
 /**
  * @brief Compare bitmask is any bit in compare is set
@@ -35,17 +40,16 @@
  * @param _bitmask bitmask
  * @param _compare mask to compare
  */
-#define wws_bitmask_none(_bitmask, _compare)                                   \
-  (!wws_bitmask_any(_bitmask, _compare))
+#define wws_bitmask_none(_bitmask, _compare) (!wws_bitmask_any(_bitmask, _compare))
 
 /**
  * @brief mask a bitmask
  * @param _bitmask bitmask
  * @param _mask to be masked
  */
-#define wws_bitmask_mask(_bitmask, _mask)                                      \
-  do {                                                                         \
-    (_bitmask) |= (_mask);                                                     \
+#define wws_bitmask_mask(_bitmask, _mask)                                                          \
+  do {                                                                                             \
+    (_bitmask) |= (_mask);                                                                         \
   } while (0)
 
 /**
@@ -53,9 +57,9 @@
  * @param _bitmask bitmask
  * @param _mask to be unmasked
  */
-#define wws_bitmask_unmask(_bitmask, _mask)                                    \
-  do {                                                                         \
-    (_bitmask) &= ~(_mask);                                                    \
+#define wws_bitmask_unmask(_bitmask, _mask)                                                        \
+  do {                                                                                             \
+    (_bitmask) &= ~(_mask);                                                                        \
   } while (0)
 
 /**
@@ -63,8 +67,7 @@
  * @param _bitmask bitmask
  * @param _bit to compare
  */
-#define wws_bitmask_isset(_bitmask, _bit)                                      \
-  (wws_bitmask_any(_bitmask, (1U << _bit)))
+#define wws_bitmask_isset(_bitmask, _bit) (wws_bitmask_any(_bitmask, (1U << _bit)))
 
 /**
  * @brief set a bit on bitmask
@@ -78,8 +81,7 @@
  * @param _bitmask bitmask
  * @param _bit to be reset
  */
-#define wws_bitmask_reset(_bitmask, _bit)                                      \
-  wws_bitmask_unmask(_bitmask, (1U << _bit))
+#define wws_bitmask_reset(_bitmask, _bit) wws_bitmask_unmask(_bitmask, (1U << _bit))
 
 
 #endif /* ___WWS_BITMASK_H___ */

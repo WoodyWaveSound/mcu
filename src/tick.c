@@ -4,7 +4,6 @@
  * Copyright (c) Woody Wave Sound and contributors. All rights reserved.
  * Licensed under the MIT license. See LICENSE file in the project root for details.
  */
-#ifndef ___WWS_ARM_COMPATIBLE_H___
-#define ___WWS_ARM_COMPATIBLE_H___
+#include <wws_mcu/tick.h>
 
-#endif /* ___WWS_ARM_COMPATIBLE_H___ */
+wws_tick_callback_t ___wws_tick_callback = 0;

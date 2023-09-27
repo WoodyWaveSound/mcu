@@ -15,3 +15,10 @@
 - Clang
 - ArmCC
 - ArmClang
+
+# Term
+
+- `WWS_NEW_`: new struct or value for right-side of assign
+- `WWS_CREATE_`: create variable without assign
+- `WWS_DEFINE_`: define a specific type or struct
+- `wws_platform_`: API to be runned in platform

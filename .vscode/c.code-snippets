@@ -13,5 +13,26 @@
     "Doxygen comment": {
         "prefix": "/",
         "body": "/** $0 */"
+    },
+    "Typedef struct": {
+        "prefix": "ts",
+        "body": [
+            "typedef struct __wws_$1_t",
+            "{",
+            "$0",
+            "} wws_$1_t;"
+        ],
+    },
+    "File Header": {
+        "prefix": "fh",
+        "body": [
+            "/**",
+            " * MCU Framework and library",
+            " * ",
+            " * Copyright (c) Woody Wave Sound and contributors. All rights reserved.",
+            " * Licensed under the MIT license. See LICENSE file in the project root for details.",
+            " */",
+            "$0"
+        ]
     }
 }

@@ -1,3 +1,9 @@
+/**
+ * MCU Framework and library
+ *
+ * Copyright (c) Woody Wave Sound and contributors. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
 #ifndef ___WWS_ROUTINE_H___
 #define ___WWS_ROUTINE_H___
 
@@ -82,21 +88,21 @@ bool wws_routine_run(wws_routine_t *routine);
  * line
  * @param _routine routine pointer
  */
-#define WWS_COROUTINE_RESUME(_routine)                                         \
-  do {                                                                         \
-    if ((_routine)->resume != NULL) { goto *((_routine)->resume); }            \
+#define WWS_COROUTINE_RESUME(_routine)                                                             \
+  do {                                                                                             \
+    if ((_routine)->resume != NULL) { goto *((_routine)->resume); }                                \
   } while (0)
 
 /**
  * @brief Yield routine as co-routine
  * @param _routine routine pointer
  */
-#define WWS_COROUTINE_YIELD(_routine)                                          \
-  do {                                                                         \
-    (_routine)->resume = &&WWS_LOCAL_VAR(label);                               \
-    return;                                                                    \
-    WWS_LOCAL_VAR(label)                                                       \
-    :;                                                                         \
+#define WWS_COROUTINE_YIELD(_routine)                                                              \
+  do {                                                                                             \
+    (_routine)->resume = &&WWS_LOCAL_VAR(label);                                                   \
+    return;                                                                                        \
+    WWS_LOCAL_VAR(label)                                                                           \
+    :;                                                                                             \
   } while (0)
 
 /**
@@ -104,20 +110,20 @@ bool wws_routine_run(wws_routine_t *routine);
  * @param _routine routine pointer
  * @param _ticks ticks to sleep
  */
-#define WWS_COROUTINE_SLEEP(_routine, _ticks)                                  \
-  do {                                                                         \
-    (_routine)->timestamp = wws_get_tick();                                    \
-    WWS_COROUTINE_YIELD(_routine);                                             \
-    if (!wws_is_tickup((_routine)->timestamp, (_ticks))) { return; }           \
+#define WWS_COROUTINE_SLEEP(_routine, _ticks)                                                      \
+  do {                                                                                             \
+    (_routine)->timestamp = wws_get_tick();                                                        \
+    WWS_COROUTINE_YIELD(_routine);                                                                 \
+    if (!wws_is_tickup((_routine)->timestamp, (_ticks))) { return; }                               \
   } while (0)
 
 /**
  * @brief restart routine as co-routine
  * @param _routine
  */
-#define WWS_COROUTINE_RESTART(_routine)                                        \
-  do {                                                                         \
-    (_routine)->resume = NULL;                                                 \
+#define WWS_COROUTINE_RESTART(_routine)                                                            \
+  do {                                                                                             \
+    (_routine)->resume = NULL;                                                                     \
   } while (0)
 
 #endif /* ___WWS_ROUTINE_H___ */

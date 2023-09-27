@@ -1,3 +1,9 @@
+/**
+ * MCU Framework and library
+ *
+ * Copyright (c) Woody Wave Sound and contributors. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
 #ifndef ___WWS_COMPILER_H___
 #define ___WWS_COMPILER_H___
 
@@ -12,5 +18,17 @@
 #else /** non-support compiler */
 #error Compiled with unsupported compiler
 #endif /** compiler */
+
+
+#ifndef WWS_RAM
+#error feature RAM section is necessary
+#define WWS_RAM(...)
+#endif /** WWS_RAM */
+
+#ifndef WWS_WEAK
+#error feature weak is necessary
+#define WWS_WEAK
+#endif /** WWS_WEAK */
+
 
 #endif /* ___WWS_COMPILER_H___ */

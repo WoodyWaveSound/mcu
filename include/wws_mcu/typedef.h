@@ -1,14 +1,12 @@
+/**
+ * MCU Framework and library
+ *
+ * Copyright (c) Woody Wave Sound and contributors. All rights reserved.
+ * Licensed under the MIT license. See LICENSE file in the project root for details.
+ */
 #ifndef ___WWS_TYPEDEF_H___
 #define ___WWS_TYPEDEF_H___
 
-/**
- * @brief Logic = high
- */
-#define WWS_HIGH (1)
-/**
- * @brief Logic = low
- */
-#define WWS_LOW (0)
 
 /**
  * @brief compiled-time const string with length
@@ -36,10 +34,10 @@ typedef struct __wws_cstr_t
  * @param _str
  * @param _len
  */
-#define wws_new_cstr_with_len(_str, _len)                                      \
-  (wws_cstr_t)                                                                 \
-  {                                                                            \
-    .str = (_str), .len = (_len)                                               \
+#define wws_new_cstr_with_len(_str, _len)                                                          \
+  (wws_cstr_t)                                                                                     \
+  {                                                                                                \
+    .str = (_str), .len = (_len)                                                                   \
   }
 
 
@@ -56,9 +54,20 @@ typedef struct __wws_cstr_t
  */
 #define WWS_LINE_VAR(_var, ...) ___WWS_LINE_VAR_1(_var, __LINE__, ##__VA_ARGS__)
 
-#define ___WWS_LINE_VAR_1(_var, _line, ...)                                    \
-  ___WWS_LINE_VAR_2(_var, _line, ##__VA_ARGS__)
+#define ___WWS_LINE_VAR_1(_var, _line, ...) ___WWS_LINE_VAR_2(_var, _line, ##__VA_ARGS__)
 #define ___WWS_LINE_VAR_2(_var, _line, ...) _var##_L##_line##_##__VA_ARGS__
 
+/**
+ * @brief get override value (last one)
+ * @param _type type of value to be override
+ * @param _default default value if nothing overrided
+ * @param ... nums of value to be override
+ * @return _type last element to override
+ */
+#define WWS_OVERRIDE(_type, _default, ...)                                                         \
+  ({                                                                                               \
+    _type override[] = { _default, ##__VA_ARGS__ };                                                \
+    (override[(sizeof(override) / sizeof(override[0])) - 1]);                                      \
+  })
 
 #endif /* ___WWS_TYPEDEF_H___ */
