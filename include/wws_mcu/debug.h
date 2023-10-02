@@ -117,6 +117,12 @@ static inline void wws_debug_set_callback(wws_debug_callback_t callback)
   ___wws_debug(&(wws_new_debug(_comp, _evt, _type, _data, _len, ##__VA_ARGS__)))
 
 /**
+ * @brief debug event only
+ * @note no data version to reduce work
+ */
+#define wws_event_only(_comp, _evt) __wws_debug(_comp, _evt, WWS_DEBUG_EVENT, 0, 0);
+
+/**
  * @brief debug event
  * @param ... data pointers
  */
@@ -190,32 +196,38 @@ extern const char *WWS_EVT_LOG_FATAL;
 /**
  * @brief Trace log
  */
-#define wws_trace(_format, ...) wws_log(WWS_EVT_LOG_TRACE, _format, ##__VA_ARGS__)
+#define wws_trace(_format, ...)   wws_log(WWS_EVT_LOG_TRACE, _format, ##__VA_ARGS__)
+#define wws_traceln(_format, ...) wws_trace(_format "\r\n", ##__VA_ARGS__)
 
 /**
  * @brief Debug log
  */
-#define wws_debug(_format, ...) wws_log(WWS_EVT_LOG_DEBUG, _format, ##__VA_ARGS__)
+#define wws_debug(_format, ...)   wws_log(WWS_EVT_LOG_DEBUG, _format, ##__VA_ARGS__)
+#define wws_debugln(_format, ...) wws_debug(_format "\r\n", ##__VA_ARGS__)
 
 /**
  * @brief Info log
  */
-#define wws_info(_format, ...) wws_log(WWS_EVT_LOG_INFO, _format, ##__VA_ARGS__)
+#define wws_info(_format, ...)   wws_log(WWS_EVT_LOG_INFO, _format, ##__VA_ARGS__)
+#define wws_infoln(_format, ...) wws_info(_format "\r\n", ##__VA_ARGS__)
 
 /**
  * @brief Warn log
  */
-#define wws_warn(_format, ...) wws_log(WWS_EVT_LOG_WARN, _format, ##__VA_ARGS__)
+#define wws_warn(_format, ...)   wws_log(WWS_EVT_LOG_WARN, _format, ##__VA_ARGS__)
+#define wws_warnln(_format, ...) wws_warn(_format "\r\n", ##__VA_ARGS__)
 
 /**
  * @brief Error log
  */
-#define wws_error(_format, ...) wws_log(WWS_EVT_LOG_ERROR, _format, ##__VA_ARGS__)
+#define wws_error(_format, ...)   wws_log(WWS_EVT_LOG_ERROR, _format, ##__VA_ARGS__)
+#define wws_errorln(_format, ...) wws_error(_format "\r\n", ##__VA_ARGS__)
 
 /**
  * @brief Fatal log
  */
-#define wws_fatal(_format, ...) wws_log(WWS_EVT_LOG_FATAL, _format, ##__VA_ARGS__)
+#define wws_fatal(_format, ...)   wws_log(WWS_EVT_LOG_FATAL, _format, ##__VA_ARGS__)
+#define wws_fatalln(_format, ...) wws_fatal(_format "\r\n", ##__VA_ARGS__)
 
 /**
  * @brief Assert component

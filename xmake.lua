@@ -22,6 +22,9 @@ target("mcu")
     add_files("src/database.c")
     add_files("src/tick.c")
     add_files("src/i2c.c")
+    add_files("src/spi.c")
+    add_files("src/button.c")
+    add_files("src/data.c")
     add_cxflags("-Wall")
  
 

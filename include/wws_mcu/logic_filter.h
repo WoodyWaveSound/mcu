@@ -9,6 +9,9 @@
 
 #include "logic.h"
 
+extern const char *WWS_COMP_LOGIC_FILTER;
+extern const char *WWS_EVT_CHANGE;
+
 /**
  * @brief logic reader with filter
  */
@@ -37,16 +40,15 @@ typedef struct __wws_logic_filter_t
 } wws_logic_filter_t;
 
 /**
- * @brief scan filter in reader
+ * @brief update filter in reader
  * @param reader reader which payload is filter
  */
-extern void wws_logic_filter_scan(wws_logic_reader_t *reader);
+extern void wws_logic_filter_update(wws_logic_reader_t *reader);
 
 /**
- * @brief scan list of filter in reader
- * @param list list of reader which payload is filter
- * @param num number of element in list
+ * @brief update list of filter in reader
+ * @param list list of reader which payload is filter, end of 0
  */
-extern void wws_logic_filter_scan_list(wws_logic_reader_t **list, unsigned int num);
+extern void wws_logic_filter_update_list(wws_logic_reader_t *const *const list);
 
 #endif /* ___WWS_LOGIC_FILTER_H___ */

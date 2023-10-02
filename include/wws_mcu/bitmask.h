@@ -22,11 +22,18 @@
 #define wws_new_bitmask_with_len(_len) wws_new_bitmask(0, (_len - 1))
 
 /**
+ * @brief Compare bitmask is full equal as compare under masked
+ * @param _mask masked to compare
+ * @param _compare to compare
+ */
+#define wws_bitmask_eq(_bitmask, _mask, _compare) (((_bitmask) & (_mask)) == (_compare))
+
+/**
  * @brief Compare bitmask is every bits in compare are set
  * @param _bitmask bitmask
  * @param _compare mask to compare
  */
-#define wws_bitmask_every(_bitmask, _compare) (((_bitmask) & (_mask)) == (_mask))
+#define wws_bitmask_every(_bitmask, _compare) wws_bitmask_eq(_bitmask, _compare, _compare)
 
 /**
  * @brief Compare bitmask is any bit in compare is set

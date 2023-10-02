@@ -7,8 +7,12 @@
 #include <wws_mcu/logic_filter.h>
 #include <wws_mcu/time.h>
 #include <wws_mcu/debug.h>
+#include <wws_mcu/compiler.h>
 
-void wws_logic_filter_scan(wws_logic_reader_t *reader)
+const char          *WWS_COMP_LOGIC_FILTER = "LogicFilter";
+WWS_WEAK const char *WWS_EVT_CHANGE        = "Change";
+
+void wws_logic_filter_update(wws_logic_reader_t *reader)
 {
   wws_assert((reader != 0) && (reader->payload != 0));
 
@@ -27,14 +31,16 @@ void wws_logic_filter_scan(wws_logic_reader_t *reader)
     return;
   } while (0);
 
+  wws_event(WWS_COMP_LOGIC_FILTER, WWS_EVT_CHANGE, reader, (void *) cur);
+
   filter->logic = cur;
 }
 
 
-void wws_logic_filter_scan_list(wws_logic_reader_t **list, unsigned int num)
+void wws_logic_filter_update_list(wws_logic_reader_t *const *const list)
 {
   wws_assert(list != 0);
-  for (unsigned int i = 0; i < num; i++) {
-    wws_logic_filter_scan(list[i]);
+  for (wws_logic_reader_t *reader = list[0]; reader != 0; reader++) {
+    wws_logic_filter_update(reader);
   }
 }

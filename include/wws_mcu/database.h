@@ -9,14 +9,7 @@
 
 #include "compiler.h"
 
-/**
- * @brief component of database
- */
 extern const char *WWS_COMP_DATABASE;
-
-/**
- * @brief event of invalid
- */
 extern const char *WWS_EVT_INVALID;
 
 /**

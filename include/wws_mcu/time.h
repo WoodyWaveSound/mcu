@@ -62,4 +62,10 @@ static inline bool wws_is_tickup(unsigned int stamp, unsigned int compare)
   return (wws_get_tick() - stamp) >= compare;
 }
 
+/**
+ * @brief delay for ticks
+ * @param ticks
+ */
+extern void wws_delay(unsigned int ticks);
+
 #endif /* ___WWS_TIME_H___ */

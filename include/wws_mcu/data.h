@@ -11,6 +11,11 @@
 
 #include "typedef.h"
 #include "bitmask.h"
+#include "debug.h"
+
+extern const char *WWS_COMP_DATA;
+extern const char *WWS_EVT_CHANGE;
+extern const char *WWS_EVT_WRITE;
 
 /**
  * @brief define data type
@@ -98,15 +103,18 @@ enum wws_data_write_err_t
         }                                                                                          \
         if (ok != WWS_DATA_WRITE_NORMAL) { break; }                                                \
       }                                                                                            \
+      unsigned short access = (WWS_OVERRIDE(unsigned short, 0x0, ##__VA_ARGS__));                  \
       if ((_value) != wws_data_read(_data)) {                                                      \
         if ((_data)->ref) { *((_data)->ref) = (_value); }                                          \
         else {                                                                                     \
           (_data)->data = (_value);                                                                \
         }                                                                                          \
-        (_data)->changed |= ~(WWS_OVERRIDE(unsigned short, 0x0, ##__VA_ARGS__));                   \
+        (_data)->changed |= ~access;                                                               \
+        wws_event(WWS_COMP_DATA, WWS_EVT_CHANGE, (_data), (void *) access);                        \
         ok = WWS_DATA_WRITE_CHANGED;                                                               \
       }                                                                                            \
-      (_data)->written |= ~(WWS_OVERRIDE(unsigned short, 0x0, ##__VA_ARGS__));                     \
+      (_data)->written |= ~access;                                                                 \
+      wws_event(WWS_COMP_DATA, WWS_EVT_WRITE, (_data), (void *) access);                           \
     } while (0);                                                                                   \
     (ok);                                                                                          \
   })
@@ -125,13 +133,16 @@ enum wws_data_write_err_t
         ok = WWS_DATA_WRITE_OVER_SIZE;                                                             \
         break;                                                                                     \
       }                                                                                            \
+      unsigned short access = (WWS_OVERRIDE(unsigned short, 0x0, ##__VA_ARGS__));                  \
       if (((_len) != (_data)->len) || (memcmp(wws_data_read(_data), _bulk, _len) != 0)) {          \
         memset(wws_data_read(_data), 0, (_data)->size);                                            \
         memcpy(wws_data_read(_data), _bulk, _len);                                                 \
-        (_data)->changed |= ~(WWS_OVERRIDE(unsigned int, 0x0, ##__VA_ARGS__));                     \
+        (_data)->changed |= ~access;                                                               \
+        wws_event(WWS_COMP_DATA, WWS_EVT_CHANGE, (_data), (void *) access);                        \
+        ok = WWS_DATA_WRITE_CHANGED;                                                               \
       }                                                                                            \
-      (_data)->written |= ~(WWS_OVERRIDE(unsigned int, 0x0, ##__VA_ARGS__));                       \
-      ok = WWS_DATA_WRITE_CHANGED;                                                                 \
+      (_data)->written |= ~access;                                                                 \
+      wws_event(WWS_COMP_DATA, WWS_EVT_WRITE, (_data), (void *) access);                           \
     } while (0);                                                                                   \
     (ok);                                                                                          \
   })

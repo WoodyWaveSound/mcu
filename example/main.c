@@ -18,6 +18,9 @@ char                     b[128] WWS_ROM("db") = "asds";
 static wws_data_string_t str           = { .ref = &b, .size = 128, .len = sizeof("asds") - 1 };
 void *end                WWS_ROM("db") = 0;
 
+wws_logic_reader_t r1  = {};
+wws_logic_reader_t r1f = { .payload = &(wws_logic_filter_t){ .raw = &r1 } };
+
 int main(int argc, char const *argv[])
 {
   wws_manifest_print(&wws_manifest);

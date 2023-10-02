@@ -7,3 +7,11 @@
 #include <wws_mcu/time.h>
 
 volatile unsigned int wws_tick = 0;
+
+void wws_delay(unsigned int ticks)
+{
+  unsigned int ts = wws_get_tick();
+
+  while ((ticks > 0) && !wws_is_tickup(ts, ticks))
+    ;
+}

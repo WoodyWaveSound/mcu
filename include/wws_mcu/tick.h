@@ -8,6 +8,9 @@
 #define ___WWS_TICK_H___
 
 #include "time.h"
+#include "debug.h"
+
+extern const char *WWS_COMP_TICK;
 
 /**
  * @brief tick callback for user space
@@ -35,6 +38,7 @@ static inline wws_tick_set_callback(wws_tick_callback_t callback)
   do {                                                                                             \
     wws_tick++;                                                                                    \
     if (___wws_tick_callback) { ___wws_tick_callback(); }                                          \
+    wws_event_only(WWS_COMP_TICK, 0);                                                              \
   } while (0)
 
 #endif /* ___WWS_TICK_H___ */

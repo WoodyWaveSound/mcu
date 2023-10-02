@@ -24,5 +24,8 @@
 #include "wws_mcu/manifest.h"
 
 #include "wws_mcu/i2c.h"
+#include "wws_mcu/spi.h"
+
+#include "wws_mcu/button.h"
 
 #endif /* ___WWS_WWS_H___ */

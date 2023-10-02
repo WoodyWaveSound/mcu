@@ -7,6 +7,10 @@
 #ifndef ___WWS_I2C_H___
 #define ___WWS_I2C_H___
 
+extern const char *WWS_COMP_I2C;
+extern const char *WWS_EVT_WRITE;
+extern const char *WWS_EVT_READ;
+
 /**
  * @brief i2c write/read direction
  */
@@ -58,11 +62,11 @@ typedef struct __wws_i2c_low_level_t
    * @brief is bus ready?
    * @return 0: ready, 1: busy
    */
-  int (*const is_ready)(void *payload);
+  int (*const is_ready)(void *instance);
   /**
    * @brief Send start to bus
    */
-  wws_i2c_err_t (*const start)(void          *payload,
+  wws_i2c_err_t (*const start)(void          *instance,
                                unsigned short addr,
                                wws_i2c_xfer_t xfer,
                                unsigned int   timeout);
@@ -70,22 +74,22 @@ typedef struct __wws_i2c_low_level_t
    * @brief Send restart to bus
    * @note if NULL, will use start
    */
-  wws_i2c_err_t (*const restart)(void          *payload,
+  wws_i2c_err_t (*const restart)(void          *instance,
                                  unsigned short addr,
                                  wws_i2c_xfer_t xfer,
                                  unsigned int   timeout);
   /**
    * @brief Send stop to bus
    */
-  wws_i2c_err_t (*const stop)(void *payload, unsigned short addr, unsigned int timeout);
+  wws_i2c_err_t (*const stop)(void *instance, unsigned short addr, unsigned int timeout);
   /**
    * @brief Put data to bus
    */
-  wws_i2c_err_t (*const put)(void *payload, unsigned char byte, unsigned int timeout);
+  wws_i2c_err_t (*const put)(void *instance, unsigned char byte, unsigned int timeout);
   /**
    * @brief Get data from bus
    */
-  wws_i2c_err_t (*const get)(void *payload, unsigned char *buf, unsigned int timeout);
+  wws_i2c_err_t (*const get)(void *instance, unsigned char *buf, unsigned int timeout);
 } wws_i2c_low_level_t;
 
 /**
@@ -96,11 +100,11 @@ typedef struct __wws_i2c_hal_t
   /**
    * @brief test device
    */
-  wws_i2c_err_t (*const test)(void *payload, unsigned short addr, unsigned int timeout);
+  wws_i2c_err_t (*const test)(void *instance, unsigned short addr, unsigned int timeout);
   /**
    * @brief common transfer
    */
-  wws_i2c_err_t (*const xfer)(void          *payload,
+  wws_i2c_err_t (*const xfer)(void          *instance,
                               unsigned short addr,
                               unsigned char *mem,
                               unsigned short mem_len,
@@ -113,7 +117,7 @@ typedef struct __wws_i2c_hal_t
    * @brief common write
    * @note if NULL, use xfer
    */
-  wws_i2c_err_t (*const write)(wws_i2c_t     *i2c,
+  wws_i2c_err_t (*const write)(void          *instance,
                                unsigned short addr,
                                unsigned char *data,
                                unsigned short len,
@@ -122,7 +126,7 @@ typedef struct __wws_i2c_hal_t
    * @brief common mem write
    * @note if NULL, use write
    */
-  wws_i2c_err_t (*const mem_write)(void          *payload,
+  wws_i2c_err_t (*const mem_write)(void          *instance,
                                    unsigned       addr,
                                    unsigned char *mem,
                                    unsigned short mem_len,
@@ -133,7 +137,7 @@ typedef struct __wws_i2c_hal_t
    * @brief common read
    * @note if NULL, use xfer
    */
-  wws_i2c_err_t (*const read)(void          *payload,
+  wws_i2c_err_t (*const read)(void          *instance,
                               unsigned short addr,
                               unsigned short size,
                               unsigned char *buf,
@@ -142,7 +146,7 @@ typedef struct __wws_i2c_hal_t
    * @brief common mem read
    * @note if NULL, use read
    */
-  wws_i2c_err_t (*const mem_read)(void          *payload,
+  wws_i2c_err_t (*const mem_read)(void          *instance,
                                   unsigned       addr,
                                   unsigned char *mem,
                                   unsigned short mem_len,
@@ -165,9 +169,9 @@ typedef struct __wws_i2c_t
    */
   wws_i2c_hal_t *const hal;
   /**
-   * @brief payload data of instance
+   * @brief instance data of instance
    */
-  void *const payload;
+  void *const instance;
 } wws_i2c_t;
 
 /**
