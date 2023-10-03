@@ -25,6 +25,7 @@ target("mcu")
     add_files("src/spi.c")
     add_files("src/button.c")
     add_files("src/data.c")
+    add_files("src/state_machine.c")
     add_cxflags("-Wall")
  
 

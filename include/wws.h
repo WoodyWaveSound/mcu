@@ -21,6 +21,8 @@
 #include "wws_mcu/routine.h"
 #include "wws_mcu/tick.h"
 
+#include "wws_mcu/state_machine.h"
+
 #include "wws_mcu/manifest.h"
 
 #include "wws_mcu/i2c.h"
