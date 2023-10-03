@@ -9,6 +9,12 @@
 
 #include <stdbool.h>
 
+extern const char *WWS_COMP_STATE_MACHINE;
+extern const char *WWS_EVT_CHANGE;
+extern const char *WWS_EVT_ENTER;
+extern const char *WWS_EVT_RUN;
+extern const char *WWS_EVT_LEAVE;
+
 /**
  * @brief Phase on enter to state
  */
