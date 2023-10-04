@@ -17,11 +17,13 @@
 #include "wws_mcu/logic_filter.h"
 #include "wws_mcu/database.h"
 #include "wws_mcu/ringbuffer.h"
+#include "wws_mcu/byte.h"
 
 #include "wws_mcu/routine.h"
 #include "wws_mcu/tick.h"
 
 #include "wws_mcu/state_machine.h"
+#include "wws_mcu/cli.h"
 
 #include "wws_mcu/manifest.h"
 

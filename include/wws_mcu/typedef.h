@@ -70,4 +70,15 @@ typedef struct __wws_cstr_t
     (override[(sizeof(override) / sizeof(override[0])) - 1]);                                      \
   })
 
+/**
+ * @brief create buffer
+ * @param _type type of element
+ * @param _size size of buffer
+ */
+#define WWS_NEW_BUFFER(_type, _size)                                                               \
+  (_type[_size])                                                                                   \
+  {                                                                                                \
+    [(_size) -1] = 0                                                                               \
+  }
+
 #endif /* ___WWS_TYPEDEF_H___ */

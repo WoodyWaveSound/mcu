@@ -191,7 +191,8 @@ extern const char *WWS_EVT_LOG_FATAL;
 /**
  * @brief general log
  */
-#define wws_log(_lv, _format, ...) wws_msg(WWS_COMP_LOG, _lv, _format, ##__VA_ARGS__)
+#define wws_log(_lv, _format, ...)   wws_msg(WWS_COMP_LOG, _lv, _format, ##__VA_ARGS__)
+#define wws_logln(_lv, _format, ...) wws_log(_lv, _format "\r\n", ##__VA_ARGS__)
 
 /**
  * @brief Trace log

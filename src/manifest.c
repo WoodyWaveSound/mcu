@@ -17,11 +17,11 @@ const wws_manifest_t wws_manifest = {
 
 void wws_manifest_print(const wws_manifest_t *manifest)
 {
-  wws_log(0,
-          "[MANIFEST] %s @ %d.%d.%d(%s)",
-          manifest->name,
-          manifest->major,
-          manifest->minor,
-          manifest->patch,
-          manifest->modification);
+  wws_logln(0,
+            "[MANIFEST] %s @ %d.%d.%d(%s)",
+            manifest->name,
+            manifest->major,
+            manifest->minor,
+            manifest->patch,
+            manifest->modification);
 }
