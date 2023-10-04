@@ -130,7 +130,7 @@ typedef struct __wws_i2c_hal_t
                                    unsigned       addr,
                                    unsigned char *mem,
                                    unsigned short mem_len,
-                                   unsigned      *data,
+                                   unsigned char *data,
                                    unsigned short data_len,
                                    unsigned int   timeout);
   /**
@@ -151,7 +151,7 @@ typedef struct __wws_i2c_hal_t
                                   unsigned char *mem,
                                   unsigned short mem_len,
                                   unsigned short buf_size,
-                                  unsigned      *buf,
+                                  unsigned char *buf,
                                   unsigned int   timeout);
 } wws_i2c_hal_t;
 
@@ -234,7 +234,7 @@ extern wws_i2c_err_t www_i2c_mem_write(wws_i2c_t     *i2c,
                                        unsigned       addr,
                                        unsigned char *mem,
                                        unsigned short mem_len,
-                                       unsigned      *data,
+                                       unsigned char *data,
                                        unsigned short data_len,
                                        unsigned int   timeout);
 
@@ -270,7 +270,7 @@ extern wws_i2c_err_t www_i2c_mem_read(wws_i2c_t     *i2c,
                                       unsigned char *mem,
                                       unsigned short mem_len,
                                       unsigned short buf_size,
-                                      unsigned      *buf,
+                                      unsigned char *buf,
                                       unsigned int   timeout);
 
 #endif /* ___WWS_I2C_H___ */

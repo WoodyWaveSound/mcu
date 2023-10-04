@@ -12,6 +12,13 @@
 
 #define F_FIRST (1U << 7)
 
+const char *const wws_cli_err_str[] = {
+  [WWS_CLI_ERR_ARGS]     = "Args",
+  [WWS_CLI_ERR_NO_MATCH] = "NotMatch",
+  [WWS_CLI_ERR_OTHER]    = "Other",
+};
+
+
 const char *const wws_cli_cmd_type_str[] = {
   [WWS_CLI_CMD_MATCH] = "Match",
   [WWS_CLI_CMD_RESET] = "Reset",
@@ -126,9 +133,7 @@ static bool is_match(const char *ptr, wws_cstr_t *cmd)
 
 static void parse(wws_cli_t *cli)
 {
-  static wws_cstr_t help          = wws_new_cstr("?");
-  static wws_cstr_t str_cmd_list  = wws_new_cstr("Command List:");
-  static wws_cstr_t str_opt_batch = wws_new_cstr("BATCH");
+  static wws_cstr_t help = wws_new_cstr("?");
 
   wws_cli_cmd_t *cur = &cli->root, **child = 0;
   const char    *ptr      = cli->buffer;
@@ -147,21 +152,22 @@ static void parse(wws_cli_t *cli)
     ptr += skip_len;
     len -= skip_len;
 
-    wws_infoln("token: %s, %d", ptr, len);
-
     if (is_match(ptr, &help)) {
       /** help */
 
-      wws_byte_write(cli->io, str_cmd_list.str, str_cmd_list.len);
+      wws_byte_write_str(cli->io, "Command List:");
       wws_byte_write(cli->io, "\r\n", 2);
-      for (child = &cur->children; *child != 0; child++) {
+      for (child = (wws_cli_cmd_t **) cur->children; *child != 0; child++) {
+        if (!wws_bitmask_every(cli->lock, (*child)->lock)) continue;
+
         wws_byte_write(cli->io, "  ", 2);
-        wws_byte_write(cli->io, (*child)->cmd.str, (*child)->cmd.len);
+        wws_byte_write_cstr(cli->io, &(*child)->cmd);
         wws_byte_put_repeat(cli->io, ' ', 10 - (*child)->cmd.len);
+        wws_byte_write_str(cli->io, "#arg=");
         wws_byte_put(cli->io, (*child)->arg_num + '0');
         wws_byte_write(cli->io, "  ", 2);
         if (wws_bitmask_any((*child)->flag, WWS_CLI_CMD_OPTION_BATCH)) {
-          wws_byte_write(cli->io, str_opt_batch.str, str_opt_batch.len);
+          wws_byte_write_str(cli->io, "BATCH");
         }
         wws_byte_write(cli->io, "\r\n", 2);
       }
@@ -175,16 +181,21 @@ static void parse(wws_cli_t *cli)
       continue;
     }
 
-    for (child = &cur->children; *child != 0; child++) {
+    for (child = (wws_cli_cmd_t **) cur->children; child != 0 && *child != 0; child++) {
       /** lock check */
       if (!wws_bitmask_every(cli->lock, (*child)->lock)) continue;
       if (!is_match(ptr, &(*child)->cmd)) continue;
       break;
     }
 
-    if (*child) { /** match */
+    if (child && *child) { /** match */
       (*child)->parse.ptr = ptr + (*child)->cmd.len;
       (*child)->parse.len = len - (*child)->cmd.len;
+      int skip            = wws_cli_get_token((*child)->parse.ptr, (*child)->parse.len, 0);
+      if (skip >= 0) {
+        (*child)->parse.ptr += skip;
+        (*child)->parse.len -= skip;
+      }
 
 
       if ((*child)->callback) {
@@ -208,7 +219,7 @@ static void parse(wws_cli_t *cli)
     else { /** not match */ err = WWS_CLI_ERR_NO_MATCH;
       break;
     }
-  } while ((skip_len = wws_cli_get_token(ptr, len, 1)) > 0);
+  } while ((skip_len = wws_cli_get_token(ptr, len, 1)) >= 0);
 
   if (err == WWS_CLI_ERR_OK) {
     for (wws_cli_cmd_t *p = &cli->root; p != 0; p = p->parse.next) {
@@ -217,6 +228,19 @@ static void parse(wws_cli_t *cli)
   }
   else if (err != WWS_CLI_ERR_ABORT) {
     /** error happened */
+    wws_byte_write_str(cli->io, "\r\n");
+    wws_byte_write_str(cli->io, "Error: \r\n");
+    unsigned int skip = cli->buf_len - cur->parse.len +
+                        wws_cli_get_token(cur->parse.ptr, cur->parse.len, cur->arg_num);
+    wws_byte_write_str(cli->io, "\r\n");
+    wws_byte_write(cli->io, cli->buffer, cli->buf_len);
+    wws_byte_write_str(cli->io, "\r\n");
+    wws_byte_put_repeat(cli->io, ' ', skip);
+    wws_byte_put(cli->io, '^');
+    wws_byte_write_str(cli->io, "\r\n");
+    wws_byte_put_repeat(cli->io, ' ', skip);
+    wws_byte_write_str(cli->io, wws_cli_err_str[err]);
+    wws_byte_write_str(cli->io, "\r\n");
   }
 
   for (wws_cli_cmd_t *p = cur; p != 0; p = p->parse.prev) {

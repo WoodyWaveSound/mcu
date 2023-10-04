@@ -154,7 +154,7 @@ wws_i2c_err_t www_i2c_mem_write(wws_i2c_t     *i2c,
                                 unsigned       addr,
                                 unsigned char *mem,
                                 unsigned short mem_len,
-                                unsigned      *data,
+                                unsigned char *data,
                                 unsigned short data_len,
                                 unsigned int   timeout)
 {
@@ -202,7 +202,7 @@ wws_i2c_err_t www_i2c_mem_read(wws_i2c_t     *i2c,
                                unsigned char *mem,
                                unsigned short mem_len,
                                unsigned short buf_size,
-                               unsigned      *buf,
+                               unsigned char *buf,
                                unsigned int   timeout)
 {
   wws_i2c_err_t err = WWS_I2C_ERR_OK;

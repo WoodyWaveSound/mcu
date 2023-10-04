@@ -26,7 +26,7 @@ extern wws_tick_callback_t ___wws_tick_callback;
  * @brief set callback for tick run
  * @param callback
  */
-static inline wws_tick_set_callback(wws_tick_callback_t callback)
+static inline void wws_tick_set_callback(wws_tick_callback_t callback)
 {
   ___wws_tick_callback = callback;
 }

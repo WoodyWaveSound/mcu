@@ -8,6 +8,11 @@
 #define ___WWS_BITMASK_H___
 
 /**
+ * @brief generate bitmask by bit
+ */
+#define wws_bitmask(_bit) (1U << _bit)
+
+/**
  * @brief Generate bitmask with first and last bit
  * @param _first first bit position
  * @param _last last bit position

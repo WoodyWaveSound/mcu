@@ -54,8 +54,8 @@ typedef struct __wws_state_machine_t
  * @param state
  * @return is changed?
  */
-extern bool wws_state_machine_change_state(wws_state_machine_t       *sm,
-                                           wws_state_machine_state_t *state);
+extern bool wws_state_machine_change_state(wws_state_machine_t      *sm,
+                                           wws_state_machine_state_t state);
 
 /**
  * @brief Run state machine

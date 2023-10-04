@@ -13,7 +13,7 @@ WWS_WEAK const char *WWS_EVT_START = "Start";
 WWS_WEAK const char *WWS_EVT_XFER  = "Xfer";
 WWS_WEAK const char *WWS_EVT_STOP  = "Stop";
 
-wws_spi_err_t wws_spi_xfer_batch(wws_spi_dev_t *dev, wws_spi_xfer_t *const *const xfers)
+wws_spi_err_t wws_spi_xfer_batch(wws_spi_dev_t *dev, wws_spi_xfer_t *xfers[])
 {
   wws_assert(dev && dev->spi && dev->spi->ll && xfers);
 
@@ -50,5 +50,5 @@ wws_spi_err_t wws_spi_xfer(wws_spi_dev_t *dev, wws_spi_xfer_t *const xfer)
 {
   wws_assert(xfer);
 
-  return wws_spi_xfer_batch(dev, (void **){ xfer, 0 });
+  return wws_spi_xfer_batch(dev, (wws_spi_xfer_t *[]){ xfer, 0 });
 }

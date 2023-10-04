@@ -32,7 +32,7 @@ unsigned int wws_byte_put(wws_byte_t *b, char byte)
   return b->interface->put(b->instance, byte);
 }
 
-unsigned int wws_byte_write(wws_byte_t *b, char *bytes, unsigned int len)
+unsigned int wws_byte_write(wws_byte_t *b, const char *bytes, unsigned int len)
 {
   wws_assert(b && b->interface);
   if (b->interface->write) { return b->interface->write(b->instance, bytes, len); }
@@ -44,6 +44,16 @@ unsigned int wws_byte_write(wws_byte_t *b, char *bytes, unsigned int len)
     return l;
   }
 }
+
+unsigned int wws_byte_write_str(wws_byte_t *b, const char *str)
+{
+  unsigned int len = 0;
+  for (; *str != 0; str++, len++) {
+    if (wws_byte_put(b, *str) == 0) break;
+  }
+  return len;
+}
+
 
 unsigned int wws_byte_put_repeat(wws_byte_t *b, char byte, unsigned int times)
 {

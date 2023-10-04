@@ -146,7 +146,7 @@ typedef struct __wws_spi_xfer_t
  * @param xfers array of xfer message
  * @return wws_spi_err_t
  */
-extern wws_spi_err_t wws_spi_xfer_batch(wws_spi_dev_t *dev, wws_spi_xfer_t *const *const xfers);
+extern wws_spi_err_t wws_spi_xfer_batch(wws_spi_dev_t *dev, wws_spi_xfer_t *xfers[]);
 
 /**
  * @brief exchange xfer message

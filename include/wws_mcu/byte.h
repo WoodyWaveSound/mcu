@@ -7,6 +7,8 @@
 #ifndef ___WWS_BYTE_H___
 #define ___WWS_BYTE_H___
 
+#include "typedef.h"
+
 /**
  * @brief Interface of byte
  */
@@ -31,7 +33,7 @@ typedef struct __wws_byte_interface_t
    * @brief write bulk of bytes
    * @return length of written
    */
-  unsigned int (*const write)(void *instance, char *bytes, unsigned int len);
+  unsigned int (*const write)(void *instance, const char *bytes, unsigned int len);
 } wws_byte_interface_t;
 
 
@@ -79,7 +81,26 @@ extern unsigned int wws_byte_put(wws_byte_t *b, char byte);
  * @param len
  * @return length of written
  */
-extern unsigned int wws_byte_write(wws_byte_t *b, char *bytes, unsigned int len);
+extern unsigned int wws_byte_write(wws_byte_t *b, const char *bytes, unsigned int len);
+
+/**
+ * @brief write cstr
+ * @param b
+ * @param cstr
+ * @return lenght of written
+ */
+static inline unsigned int wws_byte_write_cstr(wws_byte_t *b, const wws_cstr_t *cstr)
+{
+  return wws_byte_write(b, cstr->str, cstr->len);
+}
+
+/**
+ * @brief write string
+ * @param b
+ * @param str
+ * @return length of written
+ */
+extern unsigned int wws_byte_write_str(wws_byte_t *b, const char *str);
 
 /**
  * @brief repeat put byte for times

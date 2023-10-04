@@ -17,7 +17,7 @@ const char          *WWS_STATE_MACHINE_ENTER = "ENTER";
 const char          *WWS_STATE_MACHINE_RUN   = "RUN";
 const char          *WWS_STATE_MACHINE_LEAVE = "LEAVE";
 
-bool wws_state_machine_change_state(wws_state_machine_t *sm, wws_state_machine_state_t *state)
+bool wws_state_machine_change_state(wws_state_machine_t *sm, wws_state_machine_state_t state)
 {
   wws_assert(sm);
   if (sm->state == state) { return false; }

@@ -53,7 +53,7 @@ typedef struct __wws_logic_writer_t
  */
 static inline unsigned char wws_logic_read(wws_logic_reader_t *reader)
 {
-  return reader->read == 0 ? ((struct { unsigned char logic } *) (reader->payload))->logic :
+  return reader->read == 0 ? ((struct { unsigned char logic; } *) (reader->payload))->logic :
                              reader->read(reader->payload);
 }
 

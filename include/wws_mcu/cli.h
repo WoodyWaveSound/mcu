@@ -64,6 +64,11 @@ typedef enum __wws_cli_err_t
 } wws_cli_err_t;
 
 /**
+ * @brief error string
+ */
+extern const char *const wws_cli_err_str[];
+
+/**
  * @brief Cmd run type
  */
 typedef enum __wws_cli_cmd_type_t
@@ -82,6 +87,9 @@ typedef enum __wws_cli_cmd_type_t
   WWS_CLI_CMD_RESET,
 } wws_cli_cmd_type_t;
 
+/**
+ * @brief type str
+ */
 extern const char *const wws_cli_cmd_type_str[];
 
 /**
@@ -125,11 +133,11 @@ typedef struct __wws_cli_cmd_t
     /**
      * @brief prev cmd in parsing
      */
-    const struct __wws_cli_cmd_t *prev;
+    struct __wws_cli_cmd_t *prev;
     /**
      * @brief next cmd in parsing
      */
-    const struct __wws_cli_cmd_t *next;
+    struct __wws_cli_cmd_t *next;
     /**
      * @brief parsing ptr
      */
@@ -195,32 +203,5 @@ extern int wws_cli_get_token(const char *ptr, unsigned int len, unsigned char sk
  * @param cli
  */
 extern void wws_cli_parse(wws_cli_t *cli);
-
-/**
- * @brief put byte to cli io
- * @param cli
- * @param byte
- */
-extern void wws_cli_put(wws_cli_t *cli, char byte);
-
-/**
- * @brief write bytes to cli io
- * @param cli
- * @param bytes
- * @param len
- */
-extern void wws_cli_write(wws_cli_t *cli, char *bytes, unsigned int len);
-
-/**
- * @brief write bytes with line end
- * @param cli
- * @param bytes
- * @param len
- */
-static inline void wws_cli_writeln(wws_cli_t *cli, char *bytes, unsigned int len)
-{
-  wws_cli_writeln(cli, bytes, len);
-  wws_cli_writeln(cli, "\r\n", 2);
-}
 
 #endif /* ___WWS_CLI_H___ */
