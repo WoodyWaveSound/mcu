@@ -68,4 +68,37 @@ static inline bool wws_is_tickup(unsigned int stamp, unsigned int compare)
  */
 extern void wws_delay(unsigned int ticks);
 
+/**
+ * @brief system uptime calculated by tick
+ */
+extern struct __wws_uptime_t
+{
+  /**
+   * @brief day
+   */
+  unsigned int day;
+  /**
+   * @brief hour
+   */
+  unsigned char hour;
+  /**
+   * @brief mins
+   */
+  unsigned char min;
+  /**
+   * @brief seconds
+   */
+  unsigned char sec;
+  /**
+   * @brief milliseconds
+   */
+  unsigned short msec;
+} wws_uptime;
+
+
+/**
+ * @brief system tick increase
+ */
+extern void ___wws_tick_inc();
+
 #endif /* ___WWS_TIME_H___ */

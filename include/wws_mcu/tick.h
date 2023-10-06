@@ -36,7 +36,7 @@ static inline void wws_tick_set_callback(wws_tick_callback_t callback)
  */
 #define wws_platform_tick()                                                                        \
   do {                                                                                             \
-    wws_tick++;                                                                                    \
+    ___wws_tick_inc();                                                                             \
     if (___wws_tick_callback) { ___wws_tick_callback(); }                                          \
     wws_event_only(WWS_COMP_TICK, 0);                                                              \
   } while (0)

@@ -15,3 +15,39 @@ void wws_delay(unsigned int ticks)
   while ((ticks > 0) && !wws_is_tickup(ts, ticks))
     ;
 }
+
+void ___wws_tick_inc()
+{
+  wws_tick++;
+
+#if WWS_CONFIG_TICK_PER_US == 1000
+  wws_uptime.msec++;
+#else
+  static unsigned int cnt = 0;
+  cnt++;
+  if (cnt == (1000 / WWS_CONFIG_TICK_PER_US)) {
+    cnt = 0;
+    wws_uptime.msec++;
+  }
+#endif
+
+  if (wws_uptime.msec == 1000) {
+    wws_uptime.msec = 0;
+    wws_uptime.sec++;
+
+    if (wws_uptime.sec == 60) {
+      wws_uptime.sec = 0;
+      wws_uptime.min++;
+
+      if (wws_uptime.min == 60) {
+        wws_uptime.min = 0;
+        wws_uptime.hour++;
+
+        if (wws_uptime.hour == 24) {
+          wws_uptime.hour = 0;
+          wws_uptime.day++;
+        }
+      }
+    }
+  }
+}
