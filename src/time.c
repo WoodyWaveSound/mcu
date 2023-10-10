@@ -8,6 +8,8 @@
 
 volatile unsigned int wws_tick = 0;
 
+struct __wws_uptime_t wws_uptime = { 0 };
+
 void wws_delay(unsigned int ticks)
 {
   unsigned int ts = wws_get_tick();

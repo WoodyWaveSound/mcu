@@ -30,5 +30,10 @@
 #define WWS_WEAK
 #endif /** WWS_WEAK */
 
+#ifndef WWS_ALIAS
+#error alias is necessary
+#define WWS_ALIAS(...)
+#endif /** WWS_ALIAS */
+
 
 #endif /* ___WWS_COMPILER_H___ */
