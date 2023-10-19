@@ -18,10 +18,11 @@ const wws_manifest_t wws_manifest = {
 void wws_manifest_print(const wws_manifest_t *manifest)
 {
   wws_logln(0,
-            "[MANIFEST] %s @ %d.%d.%d(%s)",
+            "[MANIFEST] %s : %d.%d.%d%c%s @ " __DATE__ " " __TIME__,
             manifest->name,
             manifest->major,
             manifest->minor,
             manifest->patch,
+            manifest->modification ? '-' : 0,
             manifest->modification);
 }

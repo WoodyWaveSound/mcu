@@ -16,5 +16,6 @@
 #define WWS_WEAK          __attribute__((weak))
 #define WWS_NORETURN      __attribute__((__noreturn__))
 #define WWS_ALIAS(_alias) __attribute__((alias(#_alias)))
+#define WWS_PACKED        __attribute__((__packed__))
 
 #endif /* ___WWS_GCC_COMPATIBLE_H___ */

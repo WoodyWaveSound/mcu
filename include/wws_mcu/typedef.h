@@ -7,6 +7,7 @@
 #ifndef ___WWS_TYPEDEF_H___
 #define ___WWS_TYPEDEF_H___
 
+#include "compiler.h"
 
 /**
  * @brief compiled-time const string with length
@@ -80,5 +81,32 @@ typedef struct __wws_cstr_t
   {                                                                                                \
     [(_size) -1] = 0                                                                               \
   }
+
+/**
+ * @brief component identifer
+ */
+typedef const char *wws_comp_t;
+
+/**
+ * @brief event identifier
+ */
+typedef const char *wws_evt_t;
+
+/**
+ * @brief error identifier
+ */
+typedef const char *wws_ret_t;
+
+/**
+ * @brief phase
+ */
+typedef const char *wws_phase_t;
+
+/**
+ * @brief xfert
+ */
+typedef const char *wws_xfer_t;
+
+#include "bitmask.h"
 
 #endif /* ___WWS_TYPEDEF_H___ */

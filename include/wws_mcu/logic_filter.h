@@ -41,13 +41,13 @@ typedef struct __wws_logic_filter_t
 
 /**
  * @brief update filter in reader
- * @param reader reader which payload is filter
+ * @param reader reader which inst is filter
  */
 extern void wws_logic_filter_update(wws_logic_reader_t *reader);
 
 /**
  * @brief update list of filter in reader
- * @param list list of reader which payload is filter, end of 0
+ * @param list list of reader which inst is filter, end of 0
  */
 extern void wws_logic_filter_update_list(wws_logic_reader_t *const *const list);
 

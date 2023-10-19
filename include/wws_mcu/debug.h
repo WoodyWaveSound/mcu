@@ -20,13 +20,19 @@
 #endif /** WWS_CONFIG_DBG_MSG_LEN */
 
 /**
- * @brief Type for message output
+ * @brief debug type
  */
-#define WWS_DEBUG_MESSAGE (1U << 0)
-/**
- * @brief Type for event output
- */
-#define WWS_DEBUG_EVENT (1U << 1)
+typedef enum WWS_PACKED __wws_debug_type_t
+{
+  /**
+   * @brief Type for message output
+   */
+  WWS_DEBUG_MESSAGE,
+  /**
+   * @brief Type for event output
+   */
+  WWS_DEBUG_EVENT,
+} wws_debug_type_t;
 
 /**
  * @brief Debug object
@@ -36,11 +42,11 @@ typedef struct __wws_debug_t
   /**
    * @brief component
    */
-  const char *component;
+  wws_comp_t component;
   /**
    * @brief event
    */
-  const char *event;
+  wws_evt_t event;
   /**
    * @brief timestamp of deug object create
    */
@@ -56,7 +62,7 @@ typedef struct __wws_debug_t
   /**
    * @brief Debug type
    */
-  const unsigned char type;
+  const wws_debug_type_t type;
 } wws_debug_t;
 
 /**
@@ -104,7 +110,7 @@ static inline void wws_debug_set_callback(wws_debug_callback_t callback)
 #define wws_new_debug(_comp, _evt, _type, _data, _len, ...)                                        \
   (wws_debug_t)                                                                                    \
   {                                                                                                \
-    .component = _comp, .event = _evt, .timestamp = wws_get_tick(), .type = _type, .data = _data,  \
+    .component = _comp, .event = _evt, .timestamp = wws_tick_get(), .type = _type, .data = _data,  \
     .len = _len, ##__VA_ARGS__                                                                     \
   }
 

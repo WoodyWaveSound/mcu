@@ -7,6 +7,8 @@
 #ifndef ___WWS_RINGBUFFER_H___
 #define ___WWS_RINGBUFFER_H___
 
+#include "typedef.h"
+
 /**
  * @brief create ringbuffer
  * @param _length must be powered of 2

@@ -14,20 +14,20 @@ WWS_WEAK const char *WWS_EVT_CHANGE        = "Change";
 
 void wws_logic_filter_update(wws_logic_reader_t *reader)
 {
-  wws_assert((reader != 0) && (reader->payload != 0));
+  wws_assert((reader != 0) && (reader->inst != 0));
 
-  wws_logic_filter_t *const filter = reader->payload;
+  wws_logic_filter_t *const filter = reader->inst;
 
   const unsigned char cur = wws_logic_read(filter->raw);
 
   if (cur == filter->logic) {
-    filter->timestamp = wws_get_tick();
+    filter->timestamp = wws_tick_get();
     return;
   }
 
   do {
-    if ((cur == WWS_HIGH) && wws_is_tickup(filter->timestamp, filter->rising)) { break; }
-    if ((cur == WWS_LOW) && wws_is_tickup(filter->timestamp, filter->falling)) { break; }
+    if ((cur == WWS_HIGH) && wws_tick_isup(filter->timestamp, filter->rising)) { break; }
+    if ((cur == WWS_LOW) && wws_tick_isup(filter->timestamp, filter->falling)) { break; }
     return;
   } while (0);
 

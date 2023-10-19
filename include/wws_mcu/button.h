@@ -98,7 +98,7 @@ static inline bool wws_button_hold_for(wws_button_t *button, unsigned int ticks)
 {
   return (wws_bitmask_any(button->flag, WWS_BUTTON_PRESSED) &&
           wws_bitmask_none(button->flag, WWS_BUTTON_RELEASED) &&
-          wws_is_tickup(button->timestamp, ticks));
+          wws_tick_isup(button->timestamp, ticks));
 }
 
 /**
@@ -110,7 +110,7 @@ static inline bool wws_button_hold_for(wws_button_t *button, unsigned int ticks)
 static inline bool wws_button_released_after(wws_button_t *button, unsigned ticks)
 {
   return (wws_bitmask_any(button->flag, WWS_BUTTON_RELEASED) &&
-          wws_is_tickup(button->timestamp, ticks));
+          wws_tick_isup(button->timestamp, ticks));
 }
 
 /**

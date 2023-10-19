@@ -6,49 +6,40 @@
  */
 #include <wws_mcu/spi.h>
 #include <wws_mcu/debug.h>
-#include <wws_mcu/compiler.h>
 
-const char          *WWS_COMP_SPI  = "SPI";
-WWS_WEAK const char *WWS_EVT_START = "Start";
-WWS_WEAK const char *WWS_EVT_XFER  = "Xfer";
-WWS_WEAK const char *WWS_EVT_STOP  = "Stop";
+wws_comp_t         WWS_COMP_SPI  = "SPI";
+WWS_WEAK wws_evt_t WWS_EVT_START = "START";
+WWS_WEAK wws_evt_t WWS_EVT_XFER  = "XFER";
+WWS_WEAK wws_evt_t WWS_EVT_STOP  = "STOP";
 
-wws_spi_err_t wws_spi_xfer_batch(wws_spi_dev_t *dev, wws_spi_xfer_t *xfers[])
+WWS_WEAK wws_ret_t WWS_RET_OK        = "OK";
+WWS_WEAK wws_ret_t WWS_RET_ERR_OTHER = "ERR_OTHER";
+
+
+wws_ret_t wws_spi_xfer_batch(wws_spi_dev_t *dev, wws_spi_xfer_t xfers[])
 {
-  wws_assert(dev && dev->spi && dev->spi->ll && xfers);
+  wws_assert(dev && dev->spi && dev->spi->interface && xfers);
 
-  wws_spi_err_t err = WWS_SPI_ERR_OK;
+  wws_ret_t ret = WWS_RET_OK;
 
-  do {
-    wws_event(WWS_COMP_SPI, WWS_EVT_START, dev);
-    err = dev->spi->ll->start(dev->spi->instance, &dev->cfg);
-    if (err != WWS_SPI_ERR_OK) break;
+  wws_event(WWS_COMP_SPI, WWS_EVT_START, dev);
+  ret = dev->spi->interface->start(dev->spi->inst, &dev->cfg);
+  if ((ret == WWS_RET_OK) && dev->cs) {
+    wws_logic_write(dev->cs, WWS_LOW);
+    wws_delay(dev->cfg.delay.start);
+  }
 
-    if (dev->cfg.cs) {
-      wws_logic_write(dev->cfg.cs, WWS_LOW);
-      wws_delay(dev->cfg.delay.start);
-    }
-
-    for (wws_spi_xfer_t *xfer = xfers[0]; xfer != 0; xfer++) {
-      wws_event(WWS_COMP_SPI, WWS_EVT_XFER, dev, xfer);
-      err = dev->spi->ll->exchange(dev->spi->instance, xfer->data, xfer->len, xfer->buf);
-      if (err != WWS_SPI_ERR_OK) break;
-    }
-  } while (0);
+  for (int i = 0; (ret == WWS_RET_OK) && xfers[i].len; i++) {
+    wws_event(WWS_COMP_SPI, WWS_EVT_XFER, dev, &xfers[i]);
+    ret = dev->spi->interface->exchange(dev->spi->inst, &dev->cfg, &xfers[i]);
+  }
 
   wws_event(WWS_COMP_SPI, WWS_EVT_STOP, dev);
-  if (dev->cfg.cs) {
-    wws_logic_write(dev->cfg.cs, WWS_HIGH);
+  if (dev->cs) {
+    wws_logic_write(dev->cs, WWS_HIGH);
     wws_delay(dev->cfg.delay.stop);
   }
-  dev->spi->ll->stop(dev->spi->instance, &dev->cfg);
+  dev->spi->interface->stop(dev->spi->inst, &dev->cfg);
 
-  return err;
-}
-
-wws_spi_err_t wws_spi_xfer(wws_spi_dev_t *dev, wws_spi_xfer_t *const xfer)
-{
-  wws_assert(xfer);
-
-  return wws_spi_xfer_batch(dev, (wws_spi_xfer_t *[]){ xfer, 0 });
+  return ret;
 }

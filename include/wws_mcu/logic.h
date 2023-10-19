@@ -7,14 +7,23 @@
 #ifndef ___WWS_LOGIC_H___
 #define ___WWS_LOGIC_H___
 
+#include "typedef.h"
+
 /**
- * @brief Logic = high
+ * @brief logic
  */
-#define WWS_HIGH (1)
-/**
- * @brief Logic = low
- */
-#define WWS_LOW (0)
+typedef enum WWS_PACKED __wws_logic_t
+{
+  /**
+   * @brief Logic = low
+   */
+  WWS_LOW,
+  /**
+   * @brief Logic = high
+   */
+  WWS_HIGH,
+} wws_logic_t;
+
 
 /**
  * @brief logic reader
@@ -24,11 +33,11 @@ typedef struct __wws_logic_reader_t
   /**
    * @brief read function
    */
-  unsigned char (*read)(void *payload);
+  wws_logic_t (*read)(void *inst);
   /**
-   * @brief payload for instance or cached
+   * @brief inst for inst or cached
    */
-  void *payload;
+  void *const inst;
 } wws_logic_reader_t;
 
 /**
@@ -39,22 +48,22 @@ typedef struct __wws_logic_writer_t
   /**
    * @brief write function
    */
-  void (*write)(unsigned char logic, void *payload);
+  void (*write)(wws_logic_t logic, void *inst);
   /**
-   * @brief payload for instance or cached
+   * @brief inst for inst or cached
    */
-  void *payload;
+  void *const inst;
 } wws_logic_writer_t;
 
 /**
  * @brief read logic from reader
  * @param reader
- * @return unsigned char as logic
+ * @return wws_logic_t as logic
  */
-static inline unsigned char wws_logic_read(wws_logic_reader_t *reader)
+static inline wws_logic_t wws_logic_read(wws_logic_reader_t *reader)
 {
-  return reader->read == 0 ? ((struct { unsigned char logic; } *) (reader->payload))->logic :
-                             reader->read(reader->payload);
+  return reader->read == 0 ? ((struct { wws_logic_t logic; } *) (reader->inst))->logic :
+                             reader->read(reader->inst);
 }
 
 /**
@@ -62,9 +71,9 @@ static inline unsigned char wws_logic_read(wws_logic_reader_t *reader)
  * @param writer
  * @param logic logic to write
  */
-static inline void wws_logic_write(wws_logic_writer_t *writer, unsigned char logic)
+static inline void wws_logic_write(wws_logic_writer_t *writer, wws_logic_t logic)
 {
-  writer->write(logic, writer->payload);
+  writer->write(logic, writer->inst);
 }
 
 #endif /* ___WWS_LOGIC_H___ */

@@ -10,12 +10,11 @@
 #include <stdbool.h>
 
 #include "typedef.h"
-#include "bitmask.h"
 #include "debug.h"
 
-extern const char *WWS_COMP_DATA;
-extern const char *WWS_EVT_CHANGE;
-extern const char *WWS_EVT_WRITE;
+extern wws_comp_t WWS_COMP_DATA;
+extern wws_evt_t  WWS_EVT_CHANGE;
+extern wws_evt_t  WWS_EVT_WRITE;
 
 /**
  * @brief define data type
@@ -38,36 +37,13 @@ extern const char *WWS_EVT_WRITE;
     } select;                                                                                      \
   } wws_data_##_name##_t
 
-/**
- * @brief data write error
- */
-enum wws_data_write_err_t
-{
-  /**
-   * @brief normal, no changed
-   */
-  WWS_DATA_WRITE_NORMAL,
-  /**
-   * @brief write ok, data changed
-   */
-  WWS_DATA_WRITE_CHANGED,
-  /**
-   * @brief data larger than max
-   */
-  WWS_DATA_WRITE_MAX_EXCEED,
-  /**
-   * @brief data smaller than min
-   */
-  WWS_DATA_WRITE_MIN_EXCEED,
-  /**
-   * @brief data not in select definition
-   */
-  WWS_DATA_WRITE_NOT_SELECTABLE,
-  /**
-   * @brief bulk data over size
-   */
-  WWS_DATA_WRITE_OVER_SIZE,
-};
+/** rets */
+extern wws_ret_t WWS_RET_OK;
+extern wws_ret_t WWS_RET_CHANGED;
+extern wws_ret_t WWS_RET_ERR_MAX_EXCEED;
+extern wws_ret_t WWS_RET_ERR_MIN_EXCEED;
+extern wws_ret_t WWS_RET_ERR_NOT_SELECTABLE;
+extern wws_ret_t WWS_RET_ERR_OVERSIZE;
 
 /**
  * @brief read data
@@ -81,27 +57,27 @@ enum wws_data_write_err_t
  */
 #define wws_data_write(_data, _value, ...)                                                         \
   ({                                                                                               \
-    enum wws_data_write_err_t ok = WWS_DATA_WRITE_NORMAL;                                          \
+    wws_ret_t ret = WWS_RET_OK;                                                                    \
     do {                                                                                           \
       if ((_data)->max > (_data)->min) {                                                           \
         if ((_value) > (_data)->max) {                                                             \
-          ok = WWS_DATA_WRITE_MAX_EXCEED;                                                          \
+          ret = WWS_RET_ERR_MAX_EXCEED;                                                            \
           break;                                                                                   \
         }                                                                                          \
         if ((_value) < (_data)->min) {                                                             \
-          ok = WWS_DATA_WRITE_MIN_EXCEED;                                                          \
+          ret = WWS_RET_ERR_MIN_EXCEED;                                                            \
           break;                                                                                   \
         }                                                                                          \
       }                                                                                            \
       if (((_data)->select.value != 0) && (_data)->select.num != 0) {                              \
-        ok = WWS_DATA_WRITE_NOT_SELECTABLE;                                                        \
+        ret = WWS_RET_ERR_NOT_SELECTABLE;                                                          \
         for (int i = 0; i < (_data)->select.num; i++) {                                            \
           if ((_value) == (_data)->select.value[i]) {                                              \
-            ok = WWS_DATA_WRITE_NORMAL;                                                            \
+            ret = WWS_RET_OK;                                                                      \
             break;                                                                                 \
           }                                                                                        \
         }                                                                                          \
-        if (ok != WWS_DATA_WRITE_NORMAL) { break; }                                                \
+        if (ret != WWS_RET_OK) { break; }                                                          \
       }                                                                                            \
       unsigned short access = (WWS_OVERRIDE(unsigned short, 0x0, ##__VA_ARGS__));                  \
       if ((_value) != wws_data_read(_data)) {                                                      \
@@ -111,12 +87,12 @@ enum wws_data_write_err_t
         }                                                                                          \
         (_data)->changed |= ~access;                                                               \
         wws_event(WWS_COMP_DATA, WWS_EVT_CHANGE, (_data), (void *) access);                        \
-        ok = WWS_DATA_WRITE_CHANGED;                                                               \
+        ret = WWS_RET_CHANGED;                                                                     \
       }                                                                                            \
       (_data)->written |= ~access;                                                                 \
       wws_event(WWS_COMP_DATA, WWS_EVT_WRITE, (_data), (void *) access);                           \
     } while (0);                                                                                   \
-    (ok);                                                                                          \
+    (ret);                                                                                         \
   })
 
 /**
@@ -127,10 +103,10 @@ enum wws_data_write_err_t
  */
 #define wws_data_write_bulk(_data, _bulk, _len, ...)                                               \
   ({                                                                                               \
-    enum wws_data_write_err_t ok = WWS_DATA_WRITE_NORMAL;                                          \
+    wws_ret_t ret = WWS_RET_OK;                                                                    \
     do {                                                                                           \
       if ((_len) > (_data)->size) {                                                                \
-        ok = WWS_DATA_WRITE_OVER_SIZE;                                                             \
+        ret = WWS_RET_ERR_OVERSIZE;                                                                \
         break;                                                                                     \
       }                                                                                            \
       unsigned short access = (WWS_OVERRIDE(unsigned short, 0x0, ##__VA_ARGS__));                  \
@@ -139,12 +115,12 @@ enum wws_data_write_err_t
         memcpy(wws_data_read(_data), _bulk, _len);                                                 \
         (_data)->changed |= ~access;                                                               \
         wws_event(WWS_COMP_DATA, WWS_EVT_CHANGE, (_data), (void *) access);                        \
-        ok = WWS_DATA_WRITE_CHANGED;                                                               \
+        ret = WWS_RET_CHANGED;                                                                     \
       }                                                                                            \
       (_data)->written |= ~access;                                                                 \
       wws_event(WWS_COMP_DATA, WWS_EVT_WRITE, (_data), (void *) access);                           \
     } while (0);                                                                                   \
-    (ok);                                                                                          \
+    (ret);                                                                                         \
   })
 
 /**

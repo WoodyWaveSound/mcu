@@ -10,20 +10,19 @@
 #include <wws_mcu/debug.h>
 #include <wws_mcu/bitmask.h>
 
-#define F_FIRST (1U << 7)
+WWS_WEAK wws_ret_t WWS_RET_OK             = "OK";
+WWS_WEAK wws_ret_t WWS_RET_ERR_ABORT      = "ERR_ABORT";
+WWS_WEAK wws_ret_t WWS_RET_ERR_ARGS       = "ERR_ARGS";
+WWS_WEAK wws_ret_t WWS_RET_ERR_NO_MATCHED = "ERR_NO_MATCHED";
 
-const char *const wws_cli_err_str[] = {
-  [WWS_CLI_ERR_ARGS]     = "Args",
-  [WWS_CLI_ERR_NO_MATCH] = "NotMatch",
-  [WWS_CLI_ERR_OTHER]    = "Other",
-};
+wws_comp_t         WWS_COMP_CLI  = "Cli";
+WWS_WEAK wws_evt_t WWS_EVT_MATCH = "MATCH";
+WWS_WEAK wws_evt_t WWS_EVT_RUN   = "RUN";
+WWS_WEAK wws_evt_t WWS_EVT_RESET = "RESET";
 
-
-const char *const wws_cli_cmd_type_str[] = {
-  [WWS_CLI_CMD_MATCH] = "Match",
-  [WWS_CLI_CMD_RESET] = "Reset",
-  [WWS_CLI_CMD_RUN]   = "Run",
-};
+extern wws_phase_t WWS_ON_MATCH WWS_ALIAS(WWS_EVT_MATCH);
+extern wws_phase_t WWS_ON_RUN   WWS_ALIAS(WWS_EVT_RUN);
+extern wws_phase_t WWS_ON_RESET WWS_ALIAS(WWS_EVT_RESET);
 
 
 int wws_cli_get_token(const char *ptr, unsigned int len, unsigned char skip)
@@ -62,13 +61,13 @@ static void prompt(wws_cli_t *cli)
   wws_cstr_t *prompt = &default_prompt;
   if (cli->prompt.str) { prompt = &cli->prompt; }
 
-  wws_byte_write(cli->io, prompt->str, prompt->len);
+  wws_byte_write_cstr(cli->io, prompt);
   wws_byte_put(cli->io, ' ');
 }
 
 static inline void echo(wws_cli_t *cli, char c)
 {
-  if (wws_bitmask_any(cli->flag, WWS_CLI_ECHO)) { wws_byte_put(cli->io, c); }
+  if (cli->echo) { wws_byte_put(cli->io, c); }
 }
 
 enum input_t
@@ -105,7 +104,7 @@ static int fetch(wws_cli_t *cli)
     case INPUT_BACKSPACE: {
       if (cli->buf_len) {
         cli->buf_len--;
-        wws_byte_write(cli->io, "\b \b", 3);
+        wws_byte_write_str(cli->io, "\b \b");
       }
     } break;
     case INPUT_DATA: {
@@ -139,7 +138,7 @@ static void parse(wws_cli_t *cli)
   const char    *ptr      = cli->buffer;
   unsigned int   len      = cli->buf_len;
   int            skip_len = 0, skip_cnt = 0;
-  wws_cli_err_t  err = WWS_CLI_ERR_OK;
+  wws_ret_t      ret = WWS_RET_OK;
 
   /** remove lead space */
   skip_len = wws_cli_get_token(ptr, len, 0);
@@ -156,23 +155,21 @@ static void parse(wws_cli_t *cli)
       /** help */
 
       wws_byte_write_str(cli->io, "Command List:");
-      wws_byte_write(cli->io, "\r\n", 2);
+      wws_byte_write_str(cli->io, "\r\n");
       for (child = (wws_cli_cmd_t **) cur->children; *child != 0; child++) {
         if (!wws_bitmask_every(cli->lock, (*child)->lock)) continue;
 
-        wws_byte_write(cli->io, "  ", 2);
+        wws_byte_write_str(cli->io, "  ");
         wws_byte_write_cstr(cli->io, &(*child)->cmd);
-        wws_byte_put_repeat(cli->io, ' ', 10 - (*child)->cmd.len);
+        wws_byte_put_repeat(cli->io, ' ', 10 - (*child)->cmd.len, 0);
         wws_byte_write_str(cli->io, "#arg=");
         wws_byte_put(cli->io, (*child)->arg_num + '0');
-        wws_byte_write(cli->io, "  ", 2);
-        if (wws_bitmask_any((*child)->flag, WWS_CLI_CMD_OPTION_BATCH)) {
-          wws_byte_write_str(cli->io, "BATCH");
-        }
-        wws_byte_write(cli->io, "\r\n", 2);
+        wws_byte_write_str(cli->io, "  ");
+        if ((*child)->batch) { wws_byte_write_str(cli->io, "BATCH"); }
+        wws_byte_write_str(cli->io, "\r\n");
       }
 
-      err = WWS_CLI_ERR_ABORT;
+      ret = WWS_RET_ERR_ABORT;
       break;
     }
 
@@ -199,52 +196,52 @@ static void parse(wws_cli_t *cli)
 
 
       if ((*child)->callback) {
-        err = (*child)->callback(
-          WWS_CLI_CMD_MATCH, (*child)->parse.ptr, (*child)->parse.len, (*child), cli);
-        if (err != WWS_CLI_ERR_OK) break;
+        ret =
+          (*child)->callback(WWS_ON_MATCH, (*child)->parse.ptr, (*child)->parse.len, (*child), cli);
+        if (ret != WWS_RET_OK) break;
       }
 
       skip_cnt = (*child)->arg_num;
 
-      if (wws_bitmask_none((*child)->flag, WWS_CLI_CMD_OPTION_BATCH)) {
+      if ((*child)->batch == 0) {
         cur->parse.next      = (*child);
         (*child)->parse.prev = cur;
         cur                  = *child;
         child                = 0;
       }
     }
-    else if (cur->children == 0) { /** no child */ err = WWS_CLI_ERR_ARGS;
+    else if (cur->children == 0) { /** no child */ ret = WWS_RET_ERR_ARGS;
       break;
     }
-    else { /** not match */ err = WWS_CLI_ERR_NO_MATCH;
+    else { /** not match */ ret = WWS_RET_ERR_NO_MATCHED;
       break;
     }
   } while ((skip_len = wws_cli_get_token(ptr, len, 1)) >= 0);
 
-  if (err == WWS_CLI_ERR_OK) {
+  if (ret == WWS_RET_OK) {
     for (wws_cli_cmd_t *p = &cli->root; p != 0; p = p->parse.next) {
-      if (p->callback) { p->callback(WWS_CLI_CMD_RUN, p->parse.ptr, p->parse.len, p, cli); }
+      if (p->callback) { p->callback(WWS_ON_RUN, p->parse.ptr, p->parse.len, p, cli); }
     }
   }
-  else if (err != WWS_CLI_ERR_ABORT) {
+  else if (ret != WWS_RET_ERR_ABORT) {
     /** error happened */
     wws_byte_write_str(cli->io, "\r\n");
     wws_byte_write_str(cli->io, "Error: \r\n");
     unsigned int skip = cli->buf_len - cur->parse.len +
                         wws_cli_get_token(cur->parse.ptr, cur->parse.len, cur->arg_num);
     wws_byte_write_str(cli->io, "\r\n");
-    wws_byte_write(cli->io, cli->buffer, cli->buf_len);
+    wws_byte_write(cli->io, cli->buffer, cli->buf_len, 0);
     wws_byte_write_str(cli->io, "\r\n");
-    wws_byte_put_repeat(cli->io, ' ', skip);
+    wws_byte_put_repeat(cli->io, ' ', skip, 0);
     wws_byte_put(cli->io, '^');
     wws_byte_write_str(cli->io, "\r\n");
-    wws_byte_put_repeat(cli->io, ' ', skip);
-    wws_byte_write_str(cli->io, wws_cli_err_str[err]);
+    wws_byte_put_repeat(cli->io, ' ', skip, 0);
+    wws_byte_write_str(cli->io, ret);
     wws_byte_write_str(cli->io, "\r\n");
   }
 
   for (wws_cli_cmd_t *p = cur; p != 0; p = p->parse.prev) {
-    if (p->callback) { p->callback(WWS_CLI_CMD_RESET, p->parse.ptr, p->parse.len, p, cli); }
+    if (p->callback) { p->callback(WWS_ON_RESET, p->parse.ptr, p->parse.len, p, cli); }
     p->parse.next = 0;
     p->parse.ptr  = 0;
     p->parse.len  = 0;
@@ -256,10 +253,10 @@ void wws_cli_parse(wws_cli_t *cli)
   wws_assert(cli && cli->io);
 
   /** first time */
-  if (wws_bitmask_none(cli->flag, F_FIRST)) {
+  if (cli->_first == 0) {
     cli->buf_len = 0;
     prompt(cli);
-    wws_bitmask_mask(cli->flag, F_FIRST);
+    cli->_first = 1;
     return;
   }
 
@@ -270,7 +267,7 @@ void wws_cli_parse(wws_cli_t *cli)
 
   cli->buf_len = 0;
   prompt(cli);
-  if (wws_bitmask_any(cli->flag, WWS_CLI_RESET_RX)) { wws_byte_rx_reset(cli->io); }
+  if (cli->no_reset_rx == 0) { wws_byte_rx_reset(cli->io); }
 }
 
 void wws_cli_put(wws_cli_t *cli, char byte)
@@ -280,5 +277,5 @@ void wws_cli_put(wws_cli_t *cli, char byte)
 
 void wws_cli_write(wws_cli_t *cli, char *bytes, unsigned int len)
 {
-  wws_byte_write(cli->io, bytes, len);
+  wws_byte_write(cli->io, bytes, len, 0);
 }

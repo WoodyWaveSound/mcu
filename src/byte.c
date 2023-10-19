@@ -7,67 +7,76 @@
 #include <wws_mcu/byte.h>
 #include <wws_mcu/debug.h>
 
-unsigned int wws_byte_get(wws_byte_t *b, char *buf)
+WWS_WEAK wws_ret_t WWS_RET_OK        = "OK";
+WWS_WEAK wws_ret_t WWS_RET_ERR_OTHER = "OTHER";
+
+wws_ret_t wws_byte_get(wws_byte_t *b, char *buf)
 {
   wws_assert(b && b->interface && b->interface->get);
-  return b->interface->get(b->instance, buf);
+  return b->interface->get(b->inst, buf);
 }
 
-unsigned int wws_byte_read(wws_byte_t *b, unsigned int size, char *buf)
+wws_ret_t wws_byte_read(wws_byte_t *b, unsigned int size, char *buf, unsigned int *buffered)
 {
   wws_assert(b && b->interface);
-  if (b->interface->read) { return b->interface->read(b->instance, size, buf); }
+  if (b->interface->read) { return b->interface->read(b->inst, size, buf, buffered); }
   else {
+    wws_ret_t    ret = WWS_RET_OK;
     unsigned int len = 0;
     for (; len < size; len++) {
-      if (wws_byte_get(b, &buf[len]) == 0) break;
+      if ((ret = wws_byte_get(b, &buf[len])) != WWS_RET_OK) break;
     }
-    return len;
+    if (buffered) *buffered = len;
+    return ret;
   }
 }
 
-unsigned int wws_byte_put(wws_byte_t *b, char byte)
+wws_ret_t wws_byte_put(wws_byte_t *b, char byte)
 {
   wws_assert(b && b->interface && b->interface->put);
-  return b->interface->put(b->instance, byte);
+  return b->interface->put(b->inst, byte);
 }
 
-unsigned int wws_byte_write(wws_byte_t *b, const char *bytes, unsigned int len)
+wws_ret_t wws_byte_write(wws_byte_t *b, const char *bytes, unsigned int len, unsigned int *written)
 {
   wws_assert(b && b->interface);
-  if (b->interface->write) { return b->interface->write(b->instance, bytes, len); }
+  if (b->interface->write) { return b->interface->write(b->inst, bytes, len, written); }
   else {
-    unsigned int l = 0;
+    wws_ret_t    ret = WWS_RET_OK;
+    unsigned int l   = 0;
     for (; l < len; l++) {
-      if (wws_byte_put(b, bytes[l]) == 0) break;
+      if ((ret = wws_byte_put(b, bytes[l])) != WWS_RET_OK) break;
     }
-    return l;
+    if (written) *written = l;
+    return ret;
   }
 }
 
-unsigned int wws_byte_write_str(wws_byte_t *b, const char *str)
+wws_ret_t wws_byte_write_str(wws_byte_t *b, const char *str)
 {
-  unsigned int len = 0;
-  for (; *str != 0; str++, len++) {
-    if (wws_byte_put(b, *str) == 0) break;
+  wws_ret_t ret = WWS_RET_OK;
+  for (; *str != 0; str++) {
+    if ((ret = wws_byte_put(b, *str)) != WWS_RET_OK) break;
   }
-  return len;
+  return ret;
 }
 
 
-unsigned int wws_byte_put_repeat(wws_byte_t *b, char byte, unsigned int times)
+wws_ret_t wws_byte_put_repeat(wws_byte_t *b, char byte, unsigned int times, unsigned int *written)
 {
+  wws_ret_t    ret = WWS_RET_OK;
   unsigned int len = 0;
   for (; len < times; len++) {
-    if (wws_byte_put(b, byte) == 0) { break; }
+    if ((ret = wws_byte_put(b, byte)) != WWS_RET_OK) { break; }
   }
-  return len;
+  if (written) *written = len;
+  return ret;
 }
 
 
 void wws_byte_rx_reset(wws_byte_t *b)
 {
   char c = 0;
-  while (wws_byte_get(b, &c))
+  while (wws_byte_get(b, &c) == WWS_RET_OK)
     ;
 }

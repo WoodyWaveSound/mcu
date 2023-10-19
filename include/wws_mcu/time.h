@@ -8,6 +8,7 @@
 #define ___WWS_TIME_H___
 
 #include <stdbool.h>
+#include "typedef.h"
 
 /**
  * @brief Config for tick/us
@@ -46,7 +47,7 @@ extern volatile unsigned int wws_tick;
  * @brief get tick
  * @return unsigned int system tick
  */
-static inline unsigned int wws_get_tick()
+static inline unsigned int wws_tick_get()
 {
   return wws_tick;
 }
@@ -57,9 +58,9 @@ static inline unsigned int wws_get_tick()
  * @param compare ticks to compare
  * @return bool up or not
  */
-static inline bool wws_is_tickup(unsigned int stamp, unsigned int compare)
+static inline bool wws_tick_isup(unsigned int stamp, unsigned int compare)
 {
-  return (wws_get_tick() - stamp) >= compare;
+  return (wws_tick_get() - stamp) >= compare;
 }
 
 /**
@@ -78,21 +79,21 @@ extern struct __wws_uptime_t
    */
   unsigned int day;
   /**
-   * @brief hour
+   * @brief hour (0-23)
    */
-  unsigned char hour;
+  unsigned int hour : 5;
   /**
-   * @brief mins
+   * @brief mins (0-59)
    */
-  unsigned char min;
+  unsigned int min : 6;
   /**
-   * @brief seconds
+   * @brief seconds (0-59)
    */
-  unsigned char sec;
+  unsigned int sec : 6;
   /**
-   * @brief milliseconds
+   * @brief milliseconds (0-999)
    */
-  unsigned short msec;
+  unsigned int msec : 10;
 } wws_uptime;
 
 

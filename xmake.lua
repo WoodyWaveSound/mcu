@@ -16,18 +16,24 @@ target("mcu")
     add_rules("mcu")
     add_files("src/time.c")
     add_files("src/debug.c")
-    add_files("src/routine.c")
+
+    add_files("src/byte.c")
+    add_files("src/data.c")
+    add_files("src/countdown.c")
+    add_files("src/memory.c")
     add_files("src/manifest.c")
-    add_files("src/logic_filter.c")
-    add_files("src/database.c")
+
+    add_files("src/service.c")
     add_files("src/tick.c")
+
     add_files("src/i2c.c")
     add_files("src/spi.c")
-    add_files("src/button.c")
-    add_files("src/data.c")
+    
     add_files("src/state_machine.c") 
-    add_files("src/byte.c")
     add_files("src/cli.c")
+    -- add_files("src/logic_filter.c")
+    -- add_files("src/database.c")
+    -- add_files("src/button.c")
     add_cxflags("-Wall")
  
 

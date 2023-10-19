@@ -12,9 +12,9 @@ struct __wws_uptime_t wws_uptime = { 0 };
 
 void wws_delay(unsigned int ticks)
 {
-  unsigned int ts = wws_get_tick();
+  unsigned int ts = wws_tick_get();
 
-  while ((ticks > 0) && !wws_is_tickup(ts, ticks))
+  while ((ticks > 0) && !wws_tick_isup(ts, ticks))
     ;
 }
 

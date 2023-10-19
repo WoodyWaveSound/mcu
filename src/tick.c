@@ -6,6 +6,6 @@
  */
 #include <wws_mcu/tick.h>
 
-const char *WWS_COMP_TICK = "Tick";
+wws_comp_t WWS_COMP_TICK = "Tick";
 
 wws_tick_callback_t ___wws_tick_callback = 0;

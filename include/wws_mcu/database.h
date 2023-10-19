@@ -7,7 +7,7 @@
 #ifndef ___WWS_DATABASE_H___
 #define ___WWS_DATABASE_H___
 
-#include "compiler.h"
+#include "typedef.h"
 
 extern const char *WWS_COMP_DATABASE;
 extern const char *WWS_EVT_INVALID;

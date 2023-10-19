@@ -8,14 +8,16 @@
 #include <wws_mcu/debug.h>
 #include <wws_mcu/compiler.h>
 
-const char          *WWS_COMP_STATE_MACHINE  = "StateMachine";
-WWS_WEAK const char *WWS_EVT_CHANGE          = "Change";
-WWS_WEAK const char *WWS_EVT_ENTER           = "Enter";
-WWS_WEAK const char *WWS_EVT_RUN             = "Run";
-WWS_WEAK const char *WWS_EVT_LEAVE           = "Leave";
-const char          *WWS_STATE_MACHINE_ENTER = "ENTER";
-const char          *WWS_STATE_MACHINE_RUN   = "RUN";
-const char          *WWS_STATE_MACHINE_LEAVE = "LEAVE";
+wws_comp_t         WWS_COMP_STATE_MACHINE = "StateMachine";
+WWS_WEAK wws_evt_t WWS_EVT_CHANGE         = "CHANGE";
+WWS_WEAK wws_evt_t WWS_EVT_ENTER          = "ENTER";
+WWS_WEAK wws_evt_t WWS_EVT_RUN            = "RUN";
+WWS_WEAK wws_evt_t WWS_EVT_LEAVE          = "LEAVE";
+
+extern wws_phase_t WWS_ON_ENTER WWS_ALIAS(WWS_EVT_ENTER);
+extern wws_phase_t WWS_ON_RUN   WWS_ALIAS(WWS_EVT_RUN);
+extern wws_phase_t WWS_ON_LEAVE WWS_ALIAS(WWS_EVT_LEAVE);
+
 
 bool wws_state_machine_change_state(wws_state_machine_t *sm, wws_state_machine_state_t state)
 {
@@ -27,13 +29,13 @@ bool wws_state_machine_change_state(wws_state_machine_t *sm, wws_state_machine_s
   /** leave old */
   if (sm->state) {
     wws_event(WWS_COMP_STATE_MACHINE, WWS_EVT_LEAVE, sm, sm->state);
-    sm->state(WWS_STATE_MACHINE_LEAVE, sm->state, state, sm->payload);
+    sm->state(WWS_ON_LEAVE, sm->state, state, sm->inst);
   }
 
   /** start new */
   if (state) {
     wws_event(WWS_COMP_STATE_MACHINE, WWS_EVT_ENTER, sm, state);
-    sm->state(WWS_STATE_MACHINE_ENTER, sm->state, state, sm->payload);
+    sm->state(WWS_ON_ENTER, sm->state, state, sm->inst);
   }
 
   sm->state = state;
@@ -46,6 +48,11 @@ void wws_state_machine_run(wws_state_machine_t *sm)
 
   if (sm->state) {
     wws_event(WWS_COMP_STATE_MACHINE, WWS_EVT_RUN, sm, sm->state);
-    sm->state(WWS_STATE_MACHINE_RUN, 0, 0, sm->payload);
+    sm->state(WWS_ON_RUN, 0, 0, sm->inst);
   }
+}
+
+void ___wws_state_machine_service_callback(wws_phase_t phase, wws_service_t *serv)
+{
+  if (phase == WWS_ON_RUN) { wws_state_machine_run(serv->inst); }
 }

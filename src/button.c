@@ -67,7 +67,7 @@ void wws_button_update(wws_button_t *button)
     /** just pressed? */
     if (wws_bitmask_none(button->flag, WWS_BUTTON_PRESSED)) {
       wws_bitmask_mask(button->flag, WWS_BUTTON_PRESSED);
-      button->timestamp = wws_get_tick();
+      button->timestamp = wws_tick_get();
       wws_event(WWS_COMP_BUTTON, WWS_EVT_PRESSED, button);
     }
   }
@@ -76,7 +76,7 @@ void wws_button_update(wws_button_t *button)
     if (wws_bitmask_any(button->flag, WWS_BUTTON_PRESSED)) {
       wws_bitmask_unmask(button->flag, WWS_BUTTON_PRESSED);
       wws_bitmask_mask(button->flag, WWS_BUTTON_RELEASED);
-      button->timestamp = wws_get_tick();
+      button->timestamp = wws_tick_get();
       wws_event(WWS_COMP_BUTTON, WWS_EVT_RELEASED, button);
     }
     else if (wws_bitmask_any(button->flag, WWS_BUTTON_RELEASED)) {
@@ -112,7 +112,7 @@ void wws_btn_clicks_update(wws_btn_clicks_t *clicks)
     }
   }
   else if (wws_bitmask_none(clicks->button->flag, WWS_BUTTON_PRESSED)) {
-    if (wws_is_tickup(clicks->button->timestamp, clicks->timeout)) {
+    if (wws_tick_isup(clicks->button->timestamp, clicks->timeout)) {
       wws_bitmask_mask(clicks->flag, WWS_BTN_CLICKS_COUNTED);
       wws_event(WWS_COMP_BTN_CLICKS, WWS_EVT_DONE, clicks);
     }
@@ -138,7 +138,7 @@ unsigned int wws_btn_repeat_try_count(wws_btn_repeat_t *repeat)
   }
 
   unsigned int timestamp = repeat->timestamp;
-  if (repeat->count == 0) { timestamp = wws_get_tick(); }
+  if (repeat->count == 0) { timestamp = wws_tick_get(); }
   unsigned int hold_for = timestamp - repeat->button->timestamp;
 
   struct wws_btn_repeat_threshold_t *threshold = &(repeat->table[0]);

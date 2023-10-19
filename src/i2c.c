@@ -9,215 +9,64 @@
 #include <wws_mcu/debug.h>
 #include <wws_mcu/compiler.h>
 
-const char          *WWS_COMP_I2C  = "I2C";
-WWS_WEAK const char *WWS_EVT_WRITE = "Write";
-WWS_WEAK const char *WWS_EVT_READ  = "Read";
+extern wws_comp_t  WWS_COMP_I2C;
+WWS_WEAK wws_evt_t WWS_EVT_WRITE = "WRITE";
+WWS_WEAK wws_evt_t WWS_EVT_READ  = "READ";
 
-static inline wws_i2c_err_t ll_is_ready(wws_i2c_t *i2c)
+extern wws_xfer_t WWS_XFER_WRITE WWS_ALIAS(WWS_EVT_WRITE);
+extern wws_xfer_t WWS_XFER_READ  WWS_ALIAS(WWS_EVT_READ);
+
+WWS_WEAK wws_ret_t WWS_RET_OK          = "OK";
+WWS_WEAK wws_ret_t WWS_RET_ERR_BUSY    = "ERR_BUSY";
+WWS_WEAK wws_ret_t WWS_RET_ERR_NACK    = "ERR_NACK";
+WWS_WEAK wws_ret_t WWS_RET_ERR_TIMEOUT = "ERR_TIMEOUT";
+WWS_WEAK wws_ret_t WWS_RET_ERR_OTHER   = "ERR_OTHER";
+
+wws_ret_t wws_i2c_test_device(wws_i2c_t *i2c, unsigned short addr, unsigned int timeout)
 {
-  wws_assert(i2c->ll->is_ready != 0);
-  return i2c->ll->is_ready(i2c->instance) == 0 ? WWS_I2C_ERR_OK : WWS_I2C_ERR_BUSY;
+  wws_assert(i2c && i2c->interface);
+  wws_ret_t ret = WWS_RET_OK;
+  do {
+    if ((ret = i2c->interface->is_ready(i2c->inst)) != WWS_RET_OK) break;
+    if ((ret = i2c->interface->start(i2c->inst, addr, WWS_XFER_WRITE, timeout)) != WWS_RET_OK)
+      break;
+  } while (0);
+  i2c->interface->stop(i2c->inst, addr, timeout);
+  return ret;
 }
 
-static inline wws_i2c_err_t
-ll_start(wws_i2c_t *i2c, unsigned short addr, wws_i2c_xfer_t xfer, unsigned int timeout)
+wws_ret_t
+wws_i2c_xfer(wws_i2c_t *i2c, unsigned short addr, wws_i2c_xfer_t xfers[], unsigned int timeout)
 {
-  wws_assert(i2c->ll->start != 0);
-  return i2c->ll->start(i2c->instance, addr, xfer, timeout);
-}
+  wws_assert(i2c && i2c->interface);
+  wws_ret_t ret = WWS_RET_OK;
 
-static inline wws_i2c_err_t
-ll_restart(wws_i2c_t *i2c, unsigned short addr, wws_i2c_xfer_t xfer, unsigned int timeout)
-{
-  wws_assert((i2c->ll->restart != 0) || (i2c->ll->start != 0));
-  if (i2c->ll->restart) { return i2c->ll->restart(i2c->instance, addr, xfer, timeout); }
-  return i2c->ll->start(i2c->instance, addr, xfer, timeout);
-}
+  ret = i2c->interface->is_ready(i2c->inst);
 
-static inline wws_i2c_err_t ll_stop(wws_i2c_t *i2c, unsigned short addr, unsigned int timeout)
-{
-  wws_assert(i2c->ll->stop);
-  return i2c->ll->stop(i2c->instance, addr, timeout);
-}
+  for (int i = 0; (ret == WWS_RET_OK) && (xfers[i].xfer != 0); i++) {
+    wws_event(WWS_COMP_I2C, xfers[i].xfer, &xfers[i]);
 
-static inline wws_i2c_err_t ll_put(wws_i2c_t *i2c, unsigned char byte, unsigned int timeout)
-{
-  wws_assert(i2c->ll->put);
-  return i2c->ll->put(i2c->instance, byte, timeout);
-}
+    if (i && i2c->interface->restart) {
+      if ((ret = i2c->interface->restart(i2c->inst, addr, xfers[i].xfer, timeout)) != WWS_RET_OK)
+        break;
+    }
+    else {
+      if ((ret = i2c->interface->start(i2c->inst, addr, xfers[i].xfer, timeout)) != WWS_RET_OK)
+        break;
+    }
 
-static inline wws_i2c_err_t ll_get(wws_i2c_t *i2c, unsigned char *buf, unsigned int timeout)
-{
-  wws_assert(i2c->ll->get);
-  return i2c->ll->get(i2c->instance, buf, timeout);
-}
-
-
-wws_i2c_err_t wws_i2c_test_device(wws_i2c_t *i2c, unsigned short addr, unsigned int timeout)
-{
-  wws_i2c_err_t err = WWS_I2C_ERR_OK;
-  if (i2c->hal && i2c->hal->test) { err = i2c->hal->test(i2c->instance, addr, timeout); }
-  else if (i2c->ll) {
-    do {
-      err = ll_is_ready(i2c);
-      if (err != WWS_I2C_ERR_OK) break;
-      err = ll_start(i2c, addr, WWS_I2C_XFER_WRITE, timeout);
-      if (err != WWS_I2C_ERR_OK) break;
-    } while (0);
-    ll_stop(i2c, addr, timeout);
-  }
-  else {
-    /** shouldn't here */
-    err = WWS_I2C_ERR_OTHER;
-  }
-  return err;
-}
-
-wws_i2c_err_t wws_i2c_transfer(wws_i2c_t     *i2c,
-                               unsigned short addr,
-                               unsigned char *mem,
-                               unsigned short mem_len,
-                               unsigned char *data,
-                               unsigned short data_len,
-                               unsigned short buf_size,
-                               unsigned char *buf,
-                               unsigned int   timeout)
-{
-  wws_i2c_err_t err = WWS_I2C_ERR_OK;
-  if (i2c->hal && i2c->hal->xfer) {
-    err = i2c->hal->xfer(i2c->instance, addr, mem, mem_len, data, data_len, buf_size, buf, timeout);
-  }
-  else if (i2c->ll) {
-    do {
-      err = ll_is_ready(i2c);
-      if (err != WWS_I2C_ERR_OK) break;
-      if ((mem && mem_len) || (data && data_len)) {
-        err = ll_start(i2c, addr, WWS_I2C_XFER_WRITE, timeout);
-        if (err != WWS_I2C_ERR_OK) break;
-        wws_event(WWS_COMP_I2C, WWS_EVT_WRITE, i2c, (void *) addr, mem, (void *) mem_len);
-        for (unsigned short i = 0; i < mem_len; i++) {
-          err = ll_put(i2c, mem[i], timeout);
-          if (err != WWS_I2C_ERR_OK) break;
-        }
-        if (err != WWS_I2C_ERR_OK) break;
-        wws_event(WWS_COMP_I2C, WWS_EVT_WRITE, i2c, (void *) addr, data, (void *) data_len);
-        for (unsigned short i = 0; i < data_len; i++) {
-          err = ll_put(i2c, data[i], timeout);
-          if (err != WWS_I2C_ERR_OK) break;
-        }
-        if (err != WWS_I2C_ERR_OK) break;
+    if (xfers[i].xfer == WWS_XFER_WRITE) {
+      for (int d = 0; d < xfers[i].size; d++) {
+        if ((ret = i2c->interface->put(i2c->inst, xfers[i].ptr[d], timeout)) != WWS_RET_OK) break;
       }
-      if (buf && buf_size) {
-        err = ll_start(i2c, addr, WWS_I2C_XFER_READ, timeout);
-        if (err != WWS_I2C_ERR_OK) break;
-        wws_event(WWS_COMP_I2C, WWS_EVT_READ, i2c, (void *) addr, (void *) buf_size, buf);
-        for (unsigned short i = 0; i < buf_size; i++) {
-          err = ll_get(i2c, buf + i, timeout);
-          if (err != WWS_I2C_ERR_OK) break;
-        }
-        if (err != WWS_I2C_ERR_OK) break;
+    }
+    else if (xfers[i].xfer == WWS_XFER_READ) {
+      for (int d = 0; d < xfers[i].size; d++) {
+        if ((ret = i2c->interface->get(i2c->inst, &xfers[i].ptr[d], timeout)) != WWS_RET_OK) break;
       }
-    } while (0);
-    ll_stop(i2c, addr, timeout);
-  }
-  else {
-    /** shouldn't here */
-    err = WWS_I2C_ERR_OTHER;
+    }
   }
 
-  return err;
-}
-
-wws_i2c_err_t wws_i2c_write(wws_i2c_t     *i2c,
-                            unsigned short addr,
-                            unsigned char *data,
-                            unsigned short len,
-                            unsigned int   timeout)
-{
-  wws_i2c_err_t err = WWS_I2C_ERR_OK;
-  if (i2c->hal && i2c->hal->write) {
-    wws_event(WWS_COMP_I2C, WWS_EVT_WRITE, i2c, (void *) addr, data, (void *) len);
-    err = i2c->hal->write(i2c->instance, addr, data, len, timeout);
-  }
-  else if (i2c->ll) {
-    err = wws_i2c_transfer(i2c, addr, 0, 0, data, len, 0, 0, timeout);
-  }
-  else {
-    /** shouldn't here */
-    err = WWS_I2C_ERR_OTHER;
-  }
-
-  return err;
-}
-
-wws_i2c_err_t www_i2c_mem_write(wws_i2c_t     *i2c,
-                                unsigned       addr,
-                                unsigned char *mem,
-                                unsigned short mem_len,
-                                unsigned char *data,
-                                unsigned short data_len,
-                                unsigned int   timeout)
-{
-  wws_i2c_err_t err = WWS_I2C_ERR_OK;
-  if (i2c->hal && i2c->hal->mem_write) {
-    wws_event(WWS_COMP_I2C, WWS_EVT_WRITE, i2c, (void *) addr, mem, (void *) mem_len);
-    wws_event(WWS_COMP_I2C, WWS_EVT_WRITE, i2c, (void *) addr, data, (void *) data_len);
-    err = i2c->hal->mem_write(i2c->instance, addr, mem, mem_len, data, data_len, timeout);
-  }
-  else if (i2c->ll) {
-    err = wws_i2c_transfer(i2c, addr, mem, mem_len, data, data_len, 0, 0, timeout);
-  }
-  else {
-    /** shouldn't here */
-    err = WWS_I2C_ERR_OTHER;
-  }
-
-  return err;
-}
-
-wws_i2c_err_t wws_i2c_read(wws_i2c_t     *i2c,
-                           unsigned short addr,
-                           unsigned short size,
-                           unsigned char *buf,
-                           unsigned int   timeout)
-{
-  wws_i2c_err_t err = WWS_I2C_ERR_OK;
-  if (i2c->hal && i2c->hal->read) {
-    wws_event(WWS_COMP_I2C, WWS_EVT_READ, i2c, (void *) addr, (void *) size, buf);
-    err = i2c->hal->read(i2c->instance, addr, size, buf, timeout);
-  }
-  else if (i2c->ll) {
-    err = wws_i2c_transfer(i2c, addr, 0, 0, 0, 0, size, buf, timeout);
-  }
-  else {
-    /** shouldn't here */
-    err = WWS_I2C_ERR_OTHER;
-  }
-
-  return err;
-}
-
-wws_i2c_err_t www_i2c_mem_read(wws_i2c_t     *i2c,
-                               unsigned       addr,
-                               unsigned char *mem,
-                               unsigned short mem_len,
-                               unsigned short buf_size,
-                               unsigned char *buf,
-                               unsigned int   timeout)
-{
-  wws_i2c_err_t err = WWS_I2C_ERR_OK;
-  if (i2c->hal && i2c->hal->mem_read) {
-    wws_event(WWS_COMP_I2C, WWS_EVT_WRITE, i2c, (void *) addr, mem, (void *) mem_len);
-    wws_event(WWS_COMP_I2C, WWS_EVT_READ, i2c, (void *) addr, (void *) buf_size, buf);
-    err = i2c->hal->mem_read(i2c->instance, addr, mem, mem_len, buf_size, buf, timeout);
-  }
-  else if (i2c->ll) {
-    err = wws_i2c_transfer(i2c, addr, mem, mem_len, 0, 0, buf_size, buf, timeout);
-  }
-  else {
-    /** shouldn't here */
-    err = WWS_I2C_ERR_OTHER;
-  }
-
-  return err;
+  i2c->interface->stop(i2c->inst, addr, timeout);
+  return ret;
 }

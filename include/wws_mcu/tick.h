@@ -7,10 +7,12 @@
 #ifndef ___WWS_TICK_H___
 #define ___WWS_TICK_H___
 
+#include "typedef.h"
 #include "time.h"
 #include "debug.h"
+#include "service.h"
 
-extern const char *WWS_COMP_TICK;
+extern wws_comp_t WWS_COMP_TICK;
 
 /**
  * @brief tick callback for user space
@@ -38,6 +40,7 @@ static inline void wws_tick_set_callback(wws_tick_callback_t callback)
   do {                                                                                             \
     ___wws_tick_inc();                                                                             \
     if (___wws_tick_callback) { ___wws_tick_callback(); }                                          \
+    wws_service_run(WWS_ON_TICK);                                                                  \
     wws_event_only(WWS_COMP_TICK, 0);                                                              \
   } while (0)
 
