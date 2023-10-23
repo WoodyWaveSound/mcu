@@ -16,9 +16,9 @@ WWS_WEAK wws_ret_t WWS_RET_OK        = "OK";
 WWS_WEAK wws_ret_t WWS_RET_ERR_OTHER = "ERR_OTHER";
 
 
-wws_ret_t wws_spi_xfer_batch(wws_spi_dev_t *dev, wws_spi_xfer_t xfers[])
+wws_ret_t wws_spi_xfer(wws_spi_dev_t *dev, wws_spi_xfer_t xfers[])
 {
-  wws_assert(dev && dev->spi && dev->spi->interface && xfers);
+  wws_assert(dev && dev->spi && dev->spi->interface);
 
   wws_ret_t ret = WWS_RET_OK;
 

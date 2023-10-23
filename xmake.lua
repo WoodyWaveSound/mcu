@@ -14,6 +14,8 @@ rule("map")
 target("mcu")
     set_kind("static")
     add_rules("mcu")
+    add_cxflags("-Wall")
+    
     add_files("src/time.c")
     add_files("src/debug.c")
 
@@ -31,10 +33,10 @@ target("mcu")
     
     add_files("src/state_machine.c") 
     add_files("src/cli.c")
+    add_files("src/database.c")
+
     -- add_files("src/logic_filter.c")
-    -- add_files("src/database.c")
     -- add_files("src/button.c")
-    add_cxflags("-Wall")
  
 
 target("example")

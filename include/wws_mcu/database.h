@@ -8,9 +8,16 @@
 #define ___WWS_DATABASE_H___
 
 #include "typedef.h"
+#include "memory.h"
 
-extern const char *WWS_COMP_DATABASE;
-extern const char *WWS_EVT_INVALID;
+extern wws_comp_t WWS_COMP_DATABASE;
+extern wws_evt_t  WWS_EVT_INVALID;
+extern wws_ret_t  WWS_RET_OK;
+
+/**
+ * @brief load failed, re-init
+ */
+extern wws_ret_t WWS_RET_REINIT;
 
 /**
  * @brief put data in database section named @p _name
@@ -34,34 +41,28 @@ typedef struct __wws_database_t
    * @brief tail variable
    */
   unsigned int *const tail;
+  /**
+   * @brief size of database
+   */
+  unsigned int size;
+  /**
+   * @brief memory interface
+   */
+  wws_memory_t memory;
 } wws_database_t;
 
+/**
+ * @brief load database from memory region
+ * @param db
+ * @return
+ */
+extern wws_ret_t wws_database_load(wws_database_t *db);
 
 /**
- * @brief get database ptr operate as bulk data
+ * @brief save database to memory region
  * @param db
- * @return void * pointer of database begin
+ * @return
  */
-static inline void *wws_database_ptr(wws_database_t *db)
-{
-  return (void *) db->head;
-}
-
-/**
- * @brief get database size in bytes
- * @param db
- * @return unsigned int in bytes
- */
-static inline unsigned int wws_database_size(wws_database_t *db)
-{
-  return (unsigned int) ((const char *) (db->tail + 1) - (const char *) (db->head));
-}
-
-/**
- * @brief valid database in memory
- * @param db
- * @return 0: valid, 1: invalid
- */
-extern int wws_database_valid(wws_database_t *db);
+extern wws_ret_t wws_database_save(wws_database_t *db);
 
 #endif /* ___WWS_DATABASE_H___ */
