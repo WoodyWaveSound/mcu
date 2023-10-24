@@ -18,6 +18,8 @@ extern wws_comp_t WWS_COMP_AW9523B;
 extern wws_evt_t WWS_EVT_READ;
 
 extern wws_ret_t WWS_RET_OK;
+extern wws_ret_t WWS_RET_ERR_INVALID;
+extern wws_ret_t WWS_RET_ERR_NOT_INIT;
 
 /**
  * @brief aw9523b driver
@@ -53,6 +55,8 @@ typedef struct __wws_aw9523b_t
     struct
     {
       unsigned int init : 1;
+      unsigned int pending_output : 1;
+      unsigned int pending_dim : 1;
     };
   };
 } wws_aw9523b_t;
@@ -71,17 +75,17 @@ extern void ___wws_aw9523b_input_service_callback(wws_phase_t on, wws_service_t 
 
 /**
  * @brief init aw9523b
- * @param aw
+ * @param dev
  * @return
  */
-extern wws_ret_t wws_aw9523b_init(wws_aw9523b_t *aw);
+extern wws_ret_t wws_aw9523b_init(wws_aw9523b_t *dev);
 
 /**
  * @brief deinit aw9523b
- * @param aw
+ * @param dev
  * @return
  */
-extern wws_ret_t wws_aw9523b_deinit(wws_aw9523b_t *aw);
+extern wws_ret_t wws_aw9523b_deinit(wws_aw9523b_t *dev);
 
 /**
  * @brief Current limits
@@ -93,11 +97,11 @@ extern wws_conf_t WWS_CONF_CURRENT_LIMIT_37mA;
 
 /**
  * @brief set current limits
- * @param aw
+ * @param dev
  * @param conf
  * @return
  */
-extern wws_ret_t wws_aw9523b_set_current_limit(wws_aw9523b_t *aw, wws_conf_t conf);
+extern wws_ret_t wws_aw9523b_set_current_limit(wws_aw9523b_t *dev, wws_conf_t conf);
 
 /**
  * @brief P0 mode
@@ -107,11 +111,11 @@ extern wws_conf_t WWS_CONF_PUSH_PULL;
 
 /**
  * @brief set p0 mode
- * @param aw
+ * @param dev
  * @param conf
  * @return
  */
-extern wws_ret_t wws_aw9523b_set_p0_mode(wws_aw9523b_t *aw, wws_conf_t conf);
+extern wws_ret_t wws_aw9523b_set_p0_mode(wws_aw9523b_t *dev, wws_conf_t conf);
 
 /**
  * @brief pending options
@@ -121,19 +125,19 @@ extern wws_phase_t WWS_PENDING_DIM;
 
 /**
  * @brief set pending for specific registers
- * @param aw
+ * @param dev
  * @param pending
  * @return
  */
-extern wws_ret_t wws_aw9523b_set_pending(wws_aw9523b_t *aw, wws_phase_t pending);
+extern wws_ret_t wws_aw9523b_set_pending(wws_aw9523b_t *dev, wws_phase_t pending);
 
 /**
  * @brief apply pending for specific registers
- * @param aw
+ * @param dev
  * @param pending
  * @return
  */
-extern wws_ret_t wws_aw9523b_apply_pending(wws_aw9523b_t *aw, wws_phase_t pending);
+extern wws_ret_t wws_aw9523b_apply_pending(wws_aw9523b_t *dev, wws_phase_t pending);
 
 /**
  * @brief AW9523B pin masks
@@ -164,46 +168,46 @@ extern wws_conf_t WWS_CONF_LED;
 
 /**
  * @brief set pins
- * @param aw
+ * @param dev
  * @param mask mask of pins
  * @param conf
  * @return
  */
-extern wws_ret_t wws_aw9523b_set_pins(wws_aw9523b_t *aw, unsigned int mask, wws_conf_t conf);
+extern wws_ret_t wws_aw9523b_set_pins(wws_aw9523b_t *dev, unsigned int mask, wws_conf_t conf);
 
 /**
  * @brief read logic from pin
- * @param aw
+ * @param dev
  * @param pin
  * @return
  */
-extern wws_logic_t wws_aw9523b_read(wws_aw9523b_t *aw, unsigned int pin);
+extern wws_logic_t wws_aw9523b_read(wws_aw9523b_t *dev, unsigned int pin);
 
 /**
  * @brief read dim from pin
- * @param aw
+ * @param dev
  * @param pin
  * @return
  */
-extern unsigned char wws_aw9523b_read_dim(wws_aw9523b_t *aw, unsigned int pin);
+extern unsigned char wws_aw9523b_read_dim(wws_aw9523b_t *dev, unsigned int pin);
 
 /**
  * @brief write logic to pins
- * @param aw
+ * @param dev
  * @param pins
  * @param logic
  * @return
  */
-extern wws_ret_t wws_aw9523b_write(wws_aw9523b_t *aw, unsigned int pins, wws_logic_t logic);
+extern wws_ret_t wws_aw9523b_write(wws_aw9523b_t *dev, unsigned int pins, wws_logic_t logic);
 
 /**
  * @brief write dim to pins
- * @param aw
+ * @param dev
  * @param pins
  * @param dim
  * @return
  */
-extern wws_ret_t wws_aw9523b_write_dim(wws_aw9523b_t *aw, unsigned int pins, unsigned char dim);
+extern wws_ret_t wws_aw9523b_write_dim(wws_aw9523b_t *dev, unsigned int pins, unsigned char dim);
 
 
 /**
