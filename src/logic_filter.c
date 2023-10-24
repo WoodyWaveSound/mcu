@@ -9,38 +9,29 @@
 #include <wws_mcu/debug.h>
 #include <wws_mcu/compiler.h>
 
-const char          *WWS_COMP_LOGIC_FILTER = "LogicFilter";
-WWS_WEAK const char *WWS_EVT_CHANGE        = "Change";
+wws_comp_t         WWS_COMP_LOGIC_FILTER = "LogicFilter";
+WWS_WEAK wws_evt_t WWS_EVT_CHANGE        = "CHANGE";
 
-void wws_logic_filter_update(wws_logic_reader_t *reader)
+void ___wws_logic_filter_service_callback(wws_phase_t on, wws_service_t *serv)
 {
-  wws_assert((reader != 0) && (reader->inst != 0));
+  wws_logic_filter_t *lf = serv->inst;
+  if (on == WWS_ON_START) { lf->logic = wws_logic_read(lf->raw); }
+  else if (on == WWS_ON_ROUTINE) {
+    const unsigned char cur = wws_logic_read(lf->raw);
 
-  wws_logic_filter_t *const filter = reader->inst;
+    if (cur == lf->logic) {
+      lf->timestamp = wws_tick_get();
+      return;
+    }
 
-  const unsigned char cur = wws_logic_read(filter->raw);
+    do {
+      if ((cur == WWS_HIGH) && wws_tick_isup(lf->timestamp, lf->rising)) { break; }
+      if ((cur == WWS_LOW) && wws_tick_isup(lf->timestamp, lf->falling)) { break; }
+      return;
+    } while (0);
 
-  if (cur == filter->logic) {
-    filter->timestamp = wws_tick_get();
-    return;
-  }
+    wws_event(WWS_COMP_LOGIC_FILTER, WWS_EVT_CHANGE, lf, (void *) cur);
 
-  do {
-    if ((cur == WWS_HIGH) && wws_tick_isup(filter->timestamp, filter->rising)) { break; }
-    if ((cur == WWS_LOW) && wws_tick_isup(filter->timestamp, filter->falling)) { break; }
-    return;
-  } while (0);
-
-  wws_event(WWS_COMP_LOGIC_FILTER, WWS_EVT_CHANGE, reader, (void *) cur);
-
-  filter->logic = cur;
-}
-
-
-void wws_logic_filter_update_list(wws_logic_reader_t *const *const list)
-{
-  wws_assert(list != 0);
-  for (wws_logic_reader_t *reader = list[0]; reader != 0; reader++) {
-    wws_logic_filter_update(reader);
+    lf->logic = cur;
   }
 }

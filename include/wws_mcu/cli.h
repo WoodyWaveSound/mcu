@@ -159,10 +159,6 @@ typedef struct __wws_cli_t
    * @brief echo
    */
   unsigned int echo : 1;
-  /**
-   * @brief first time flag
-   */
-  unsigned int _first : 1;
 } wws_cli_t;
 
 
@@ -174,12 +170,6 @@ typedef struct __wws_cli_t
  * @return unsigned int length of byte to skip to get token ptr, -1: no token until \0
  */
 extern int wws_cli_get_token(const char *ptr, unsigned int len, unsigned char skip);
-
-/**
- * @brief Parse command line
- * @param cli
- */
-extern void wws_cli_parse(wws_cli_t *cli);
 
 extern void ___wws_cli_parse_service_callback(wws_phase_t on, wws_service_t *serv);
 

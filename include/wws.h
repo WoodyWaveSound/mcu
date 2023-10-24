@@ -30,9 +30,7 @@
 #include "wws_mcu/state_machine.h"
 #include "wws_mcu/cli.h"
 #include "wws_mcu/database.h"
-
-
-// #include "wws_mcu/button.h"
-// #include "wws_mcu/logic_filter.h"
+#include "wws_mcu/logic_filter.h"
+#include "wws_mcu/button.h"
 
 #endif /* ___WWS_WWS_H___ */

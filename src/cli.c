@@ -248,28 +248,6 @@ static void parse(wws_cli_t *cli)
   }
 }
 
-void wws_cli_parse(wws_cli_t *cli)
-{
-  wws_assert(cli && cli->io);
-
-  /** first time */
-  if (cli->_first == 0) {
-    cli->buf_len = 0;
-    prompt(cli);
-    cli->_first = 1;
-    return;
-  }
-
-  /** fetch */
-  if (fetch(cli) == 0) return;
-
-  if (cli->buf_len) { parse(cli); }
-
-  cli->buf_len = 0;
-  prompt(cli);
-  if (cli->no_reset_rx == 0) { wws_byte_rx_reset(cli->io); }
-}
-
 void wws_cli_put(wws_cli_t *cli, char byte)
 {
   wws_byte_put(cli->io, byte);
@@ -278,4 +256,24 @@ void wws_cli_put(wws_cli_t *cli, char byte)
 void wws_cli_write(wws_cli_t *cli, char *bytes, unsigned int len)
 {
   wws_byte_write(cli->io, bytes, len, 0);
+}
+
+void ___wws_cli_parse_service_callback(wws_phase_t on, wws_service_t *serv)
+{
+  wws_cli_t *const cli = serv->inst;
+
+  if (on == WWS_ON_START) {
+    cli->buf_len = 0;
+    prompt(cli);
+  }
+  else if (on == WWS_ON_ROUTINE) {
+    /** fetch */
+    if (fetch(cli) == 0) return;
+
+    if (cli->buf_len) { parse(cli); }
+
+    cli->buf_len = 0;
+    prompt(cli);
+    if (cli->no_reset_rx == 0) { wws_byte_rx_reset(cli->io); }
+  }
 }

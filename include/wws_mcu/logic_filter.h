@@ -7,10 +7,12 @@
 #ifndef ___WWS_LOGIC_FILTER_H___
 #define ___WWS_LOGIC_FILTER_H___
 
+#include "typedef.h"
 #include "logic.h"
+#include "service.h"
 
-extern const char *WWS_COMP_LOGIC_FILTER;
-extern const char *WWS_EVT_CHANGE;
+extern wws_comp_t WWS_COMP_LOGIC_FILTER;
+extern wws_evt_t  WWS_EVT_CHANGE;
 
 /**
  * @brief logic reader with filter
@@ -20,7 +22,7 @@ typedef struct __wws_logic_filter_t
   /**
    * @brief cached logic (filtered)
    */
-  unsigned char logic;
+  wws_logic_t logic;
   /**
    * @brief reader for raw logic
    */
@@ -45,10 +47,9 @@ typedef struct __wws_logic_filter_t
  */
 extern void wws_logic_filter_update(wws_logic_reader_t *reader);
 
-/**
- * @brief update list of filter in reader
- * @param list list of reader which inst is filter, end of 0
- */
-extern void wws_logic_filter_update_list(wws_logic_reader_t *const *const list);
+extern void ___wws_logic_filter_service_callback(wws_phase_t on, wws_service_t *serv);
+
+#define WWS_LOGIC_FILTER_SERVICE                                                                   \
+  .callback = ___wws_logic_filter_service_callback, .default_start = 1
 
 #endif /* ___WWS_LOGIC_FILTER_H___ */

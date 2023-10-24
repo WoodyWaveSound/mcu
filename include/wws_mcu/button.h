@@ -9,21 +9,22 @@
 
 #include <stdbool.h>
 
+#include "typedef.h"
 #include "logic.h"
-#include "bitmask.h"
+#include "service.h"
 #include "time.h"
 
-extern const char *WWS_COMP_BUTTON;
-extern const char *WWS_COMP_BTN_CLICKS;
-extern const char *WWS_COMP_BTN_REPEAT;
-extern const char *WWS_EVT_RESET;
-extern const char *WWS_EVT_LOCK;
-extern const char *WWS_EVT_UNLOCK;
-extern const char *WWS_EVT_PRESSED;
-extern const char *WWS_EVT_RELEASED;
-extern const char *WWS_EVT_START;
-extern const char *WWS_EVT_COUNT;
-extern const char *WWS_EVT_DONE;
+extern wws_comp_t WWS_COMP_BUTTON;
+extern wws_comp_t WWS_COMP_BTN_CLICKS;
+extern wws_comp_t WWS_COMP_BTN_REPEAT;
+extern wws_evt_t  WWS_EVT_RESET;
+extern wws_evt_t  WWS_EVT_LOCK;
+extern wws_evt_t  WWS_EVT_UNLOCK;
+extern wws_evt_t  WWS_EVT_PRESSED;
+extern wws_evt_t  WWS_EVT_RELEASED;
+extern wws_evt_t  WWS_EVT_START;
+extern wws_evt_t  WWS_EVT_COUNT;
+extern wws_evt_t  WWS_EVT_DONE;
 
 /**
  * @brief Button
@@ -35,10 +36,6 @@ typedef struct __wws_button_t
    */
   const unsigned char active;
   /**
-   * @brief flag
-   */
-  unsigned char flag;
-  /**
    * @brief button logic input
    */
   wws_logic_reader_t *const input;
@@ -48,33 +45,26 @@ typedef struct __wws_button_t
    * - RELEASED
    */
   unsigned int timestamp;
+  /**
+   * @brief flags
+   */
+  union
+  {
+    unsigned int flags;
+    struct
+    {
+      unsigned int lock : 1;
+      unsigned int pressed : 1;
+      unsigned int released : 1;
+    };
+  };
 } wws_button_t;
-
-/**
- * @brief button lock flag to avoid strange trigger
- */
-#define WWS_BUTTON_LOCK (1U << 0)
-/**
- * @brief button is pressed
- */
-#define WWS_BUTTON_PRESSED (1U << 1)
-/**
- * @brief button is just released
- * @warning only keep for 1 cycle
- */
-#define WWS_BUTTON_RELEASED (1U << 2)
 
 /**
  * @brief reset button
  * @param button
  */
 extern void wws_button_reset(wws_button_t *button);
-
-/**
- * @brief reset list of buttons
- * @param buttons
- */
-extern void wws_button_reset_list(wws_button_t *const *const buttons);
 
 /**
  * @brief lock button until deactive
@@ -96,9 +86,7 @@ extern void wws_button_unlock(wws_button_t *button);
  */
 static inline bool wws_button_hold_for(wws_button_t *button, unsigned int ticks)
 {
-  return (wws_bitmask_any(button->flag, WWS_BUTTON_PRESSED) &&
-          wws_bitmask_none(button->flag, WWS_BUTTON_RELEASED) &&
-          wws_tick_isup(button->timestamp, ticks));
+  return button->pressed && wws_tick_isup(button->timestamp, ticks);
 }
 
 /**
@@ -109,30 +97,15 @@ static inline bool wws_button_hold_for(wws_button_t *button, unsigned int ticks)
  */
 static inline bool wws_button_released_after(wws_button_t *button, unsigned ticks)
 {
-  return (wws_bitmask_any(button->flag, WWS_BUTTON_RELEASED) &&
-          wws_tick_isup(button->timestamp, ticks));
+  return button->released && wws_tick_isup(button->timestamp, ticks);
 }
 
-/**
- * @brief update button for change
- * @param button
- */
-extern void wws_button_update(wws_button_t *button);
+extern void ___wws_button_service_callback(wws_phase_t on, wws_service_t *serv);
 
 /**
- * @brief update list of buttons
- * @param buttons list end of 0
+ * @brief service for button
  */
-extern void wws_button_update_list(wws_button_t *const *const buttons);
-
-/**
- * @brief flag for clicks counting
- */
-#define WWS_BTN_CLICKS_COUNTING (1U << 0)
-/**
- * @brief flag for clicks counted
- */
-#define WWS_BTN_CLICKS_COUNTED (1U << 1)
+#define WWS_BUTTON_SERVICE .callback = ___wws_button_service_callback, .default_start = 1
 
 /**
  * @brief count clicks
@@ -150,11 +123,12 @@ typedef struct __wws_btn_clicks_t
   /**
    * @brief count of clicks
    */
-  unsigned char count;
+  unsigned int count : 8;
   /**
-   * @brief flag
+   * @brief flags
    */
-  unsigned char flag;
+  unsigned int counting : 1;
+  unsigned int counted : 1;
 } wws_btn_clicks_t;
 
 /**
@@ -164,20 +138,12 @@ typedef struct __wws_btn_clicks_t
  */
 static inline unsigned int wws_btn_clicks_count(wws_btn_clicks_t *clicks)
 {
-  return wws_bitmask_any(clicks->flag, WWS_BTN_CLICKS_COUNTED) ? clicks->count : 0;
+  return clicks->counted ? clicks->count : 0;
 }
 
-/**
- * @brief update clicks
- * @param clicks
- */
-extern void wws_btn_clicks_update(wws_btn_clicks_t *clicks);
+extern void ___wws_btn_clicks_service_callback(wws_phase_t on, wws_service_t *serv);
 
-/**
- * @brief update list of clicks
- * @param clicks end of 0
- */
-extern void wws_btn_clicks_update_list(wws_btn_clicks_t *const *const clicks);
+#define WWS_BTN_CLICKS_SERVICE .callback = ___wws_btn_clicks_service_callback, .default_start = 1
 
 /**
  * @brief repeat of button
@@ -217,7 +183,7 @@ typedef struct __wws_btn_repeat_t
  * @param repeat
  * @return unsigned int 0: no repeat, otherwise: repeat count
  */
-extern unsigned int wws_btn_repeat_try_count(wws_btn_repeat_t *repeat);
+extern unsigned int wws_btn_repeat_try(wws_btn_repeat_t *repeat);
 
 
 #endif /* ___WWS_BUTTON_H___ */

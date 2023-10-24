@@ -34,9 +34,8 @@ target("mcu")
     add_files("src/state_machine.c") 
     add_files("src/cli.c")
     add_files("src/database.c")
-
-    -- add_files("src/logic_filter.c")
-    -- add_files("src/button.c")
+    add_files("src/logic_filter.c")
+    add_files("src/button.c")
  
 
 target("example")
