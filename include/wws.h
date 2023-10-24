@@ -33,4 +33,6 @@
 #include "wws_mcu/logic_filter.h"
 #include "wws_mcu/button.h"
 
+#include "wws_mcu/aw9523b.h"
+
 #endif /* ___WWS_WWS_H___ */

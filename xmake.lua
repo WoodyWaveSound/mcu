@@ -36,6 +36,8 @@ target("mcu")
     add_files("src/database.c")
     add_files("src/logic_filter.c")
     add_files("src/button.c")
+
+    add_files("src/aw9523b.c")
  
 
 target("example")

@@ -85,12 +85,12 @@ typedef struct __wws_cstr_t
 /**
  * @brief component identifer
  */
-typedef const char *wws_comp_t;
+typedef const char *const wws_comp_t;
 
 /**
  * @brief event identifier
  */
-typedef const char *wws_evt_t;
+typedef const char *const wws_evt_t;
 
 /**
  * @brief error identifier
@@ -100,12 +100,17 @@ typedef const char *wws_ret_t;
 /**
  * @brief phase
  */
-typedef const char *wws_phase_t;
+typedef const char *const wws_phase_t;
 
 /**
  * @brief xfert
  */
-typedef const char *wws_xfer_t;
+typedef const char *const wws_xfer_t;
+
+/**
+ * @brief general configuration
+ */
+typedef const char *const wws_conf_t;
 
 #include "bitmask.h"
 
