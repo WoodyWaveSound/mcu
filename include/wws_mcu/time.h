@@ -11,30 +11,16 @@
 #include "typedef.h"
 
 /**
- * @brief Config for tick/us
- */
-#ifndef WWS_CONFIG_TICK_PER_US
-#define WWS_CONFIG_TICK_PER_US (100)
-#endif /* WWS_CONFIG_TICK_PER_US */
-
-/**
  * @brief global ticks
  */
 extern volatile unsigned int wws_tick;
-
-/**
- * @brief us to tick
- * @param _us us
- * @return unsigned int
- */
-#define WWS_US(_us) ((unsigned int) ((_us) / WWS_CONFIG_TICK_PER_US))
 
 /**
  * @brief ms to tick
  * @param _ms ms
  * @return unsigned int
  */
-#define WWS_MS(_ms) (WWS_US(1000) * (_ms))
+#define WWS_MS(_ms) (_ms)
 
 /**
  * @brief sec to tick

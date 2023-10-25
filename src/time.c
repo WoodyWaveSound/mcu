@@ -22,16 +22,7 @@ void ___wws_tick_inc()
 {
   wws_tick++;
 
-#if WWS_CONFIG_TICK_PER_US == 1000
   wws_uptime.msec++;
-#else
-  static unsigned int cnt = 0;
-  cnt++;
-  if (cnt == (1000 / WWS_CONFIG_TICK_PER_US)) {
-    cnt = 0;
-    wws_uptime.msec++;
-  }
-#endif
 
   if (wws_uptime.msec == 1000) {
     wws_uptime.msec = 0;
