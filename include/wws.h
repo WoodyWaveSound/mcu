@@ -34,5 +34,6 @@
 #include "wws_mcu/button.h"
 
 #include "wws_mcu/aw9523b.h"
+#include "wws_mcu/encoder.h"
 
 #endif /* ___WWS_WWS_H___ */
