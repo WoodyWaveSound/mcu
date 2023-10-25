@@ -10,7 +10,8 @@
 
 wws_comp_t WWS_COMP_AW9523B = "AW9523B";
 
-WWS_WEAK wws_evt_t WWS_EVT_READ = "READ";
+WWS_WEAK wws_evt_t WWS_EVT_READ  = "READ";
+WWS_WEAK wws_evt_t WWS_EVT_WRITE = "WRITE";
 
 WWS_WEAK wws_ret_t WWS_RET_OK           = "OK";
 WWS_WEAK wws_ret_t WWS_RET_ERR_INVALID  = "ERR_INVALID";
@@ -93,11 +94,12 @@ wws_ret_t wws_aw9523b_init(wws_aw9523b_t *dev)
   if (ret != WWS_RET_OK) return ret;
 
   /** try to read id */
-  char id = 0;
-  ret     = wws_i2c_xfer(dev->bus,
+  static unsigned char id_addr = 0x10;
+  unsigned char        id      = 0;
+  ret                          = wws_i2c_xfer(dev->bus,
                      addr(dev),
                      (wws_i2c_xfer_t[]){
-                       { .ptr = (unsigned char *){ 0x10 }, .size = 1, .xfer = WWS_XFER_WRITE },
+                       { .ptr = &id_addr, .size = 1, .xfer = WWS_XFER_WRITE },
                        { .ptr = &id, .size = 1, .xfer = WWS_XFER_READ },
                        { 0 },
                      },
@@ -175,4 +177,94 @@ wws_ret_t wws_aw9523b_apply_pending(wws_aw9523b_t *dev, wws_phase_t pending)
   }
 
   return ret;
+}
+
+wws_ret_t wws_aw9523b_set_pins(wws_aw9523b_t *dev, unsigned int mask, wws_conf_t conf)
+{
+  if (dev->init == 0) return WWS_RET_ERR_NOT_INIT;
+
+  if (conf == WWS_CONF_INPUT) {
+    dev->regs[REG_DIR] |= (mask & 0xFF);
+    dev->regs[REG_DIR + 1] |= ((mask >> 8) & 0xFF);
+    dev->regs[REG_PIN_MODE] |= (mask & 0xFF);
+    dev->regs[REG_PIN_MODE + 1] |= ((mask >> 8) & 0xFF);
+  }
+  else if (conf == WWS_CONF_OUTPUT) {
+    dev->regs[REG_DIR] &= ~(mask & 0xFF);
+    dev->regs[REG_DIR + 1] &= ~((mask >> 8) & 0xFF);
+    dev->regs[REG_PIN_MODE] |= (mask & 0xFF);
+    dev->regs[REG_PIN_MODE + 1] |= ((mask >> 8) & 0xFF);
+  }
+  else if (conf == WWS_CONF_LED) {
+    dev->regs[REG_PIN_MODE] &= ~(mask & 0xFF);
+    dev->regs[REG_PIN_MODE + 1] &= ~((mask >> 8) & 0xFF);
+  }
+
+  wws_ret_t ret = reg_write(dev, 0x04, REG_DIR, 2);
+  if (ret != WWS_RET_OK) return ret;
+  ret = reg_write(dev, 0x12, REG_PIN_MODE, 2);
+  return ret;
+}
+
+wws_logic_t wws_aw9523b_read(wws_aw9523b_t *dev, unsigned int pin)
+{
+  return ((dev->regs[REG_INPUT] & (pin & 0xFF)) |
+          (dev->regs[REG_INPUT + 1] & ((pin >> 8) & 0xFF))) > 0 ?
+           WWS_HIGH :
+           WWS_LOW;
+}
+
+static const unsigned char pin_dim_map[] = {
+  REG_DIM + 4,  REG_DIM + 5,  REG_DIM + 6,  REG_DIM + 7,  REG_DIM + 8, REG_DIM + 9,
+  REG_DIM + 10, REG_DIM + 11, REG_DIM + 0,  REG_DIM + 1,  REG_DIM + 2, REG_DIM + 3,
+  REG_DIM + 12, REG_DIM + 13, REG_DIM + 14, REG_DIM + 15,
+};
+
+unsigned char wws_aw9523b_read_dim(wws_aw9523b_t *dev, unsigned int pin)
+{
+  for (unsigned char i = 0; i < 16; i++) {
+    if (pin & (1U << i)) return dev->regs[pin_dim_map[i]];
+  }
+  return 0;
+}
+
+wws_ret_t wws_aw9523b_write(wws_aw9523b_t *dev, unsigned int pins, wws_logic_t logic)
+{
+  if (dev->init == 0) return WWS_RET_ERR_NOT_INIT;
+
+  if (logic == WWS_HIGH) {
+    dev->regs[REG_OUTPUT] |= (pins & 0xFF);
+    dev->regs[REG_OUTPUT + 1] |= ((pins >> 8) & 0xFF);
+  }
+  else {
+    dev->regs[REG_OUTPUT] &= ~(pins & 0xFF);
+    dev->regs[REG_OUTPUT + 1] &= ~((pins >> 8) & 0xFF);
+  }
+
+  if (dev->pending_output) return WWS_RET_OK;
+
+  return reg_write(dev, 0x02, REG_OUTPUT, 2);
+}
+
+wws_ret_t wws_aw9523b_write_dim(wws_aw9523b_t *dev, unsigned int pins, unsigned char dim)
+{
+  if (dev->init == 0) return WWS_RET_ERR_NOT_INIT;
+  for (unsigned char i = 0; i < 16; i++) {
+    if (pins & (1U << i)) dev->regs[pin_dim_map[i]] = dim;
+  }
+
+  if (dev->pending_dim) return WWS_RET_OK;
+
+  return reg_write(dev, 0x20, REG_DIM, 16);
+}
+
+wws_logic_t wws_aw9523b_logic_reader(void *inst)
+{
+  return wws_aw9523b_pin_read(inst);
+}
+
+void wws_aw9523b_logic_writer(void *inst, wws_logic_t logic)
+{
+  wws_ret_t ret = wws_aw9523b_pin_write(inst, logic);
+  if (ret != WWS_RET_OK) wws_event(WWS_COMP_AW9523B, WWS_EVT_WRITE, inst, &logic, ret);
 }

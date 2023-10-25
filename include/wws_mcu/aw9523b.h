@@ -16,6 +16,8 @@
 extern wws_comp_t WWS_COMP_AW9523B;
 
 extern wws_evt_t WWS_EVT_READ;
+extern wws_evt_t WWS_EVT_WRITE;
+
 
 extern wws_ret_t WWS_RET_OK;
 extern wws_ret_t WWS_RET_ERR_INVALID;
@@ -187,7 +189,8 @@ extern wws_logic_t wws_aw9523b_read(wws_aw9523b_t *dev, unsigned int pin);
  * @brief read dim from pin
  * @param dev
  * @param pin
- * @return
+ * @return 0: pin exceed
+ * @note only return smallest port_pin
  */
 extern unsigned char wws_aw9523b_read_dim(wws_aw9523b_t *dev, unsigned int pin);
 
@@ -267,7 +270,7 @@ static inline wws_ret_t wws_aw9523b_pin_write_dim(wws_aw9523b_pin_t *p, unsigned
  * @param inst
  * @return
  */
-extern wws_logic_t *wws_aw9523b_logic_reader(void *inst);
+extern wws_logic_t wws_aw9523b_logic_reader(void *inst);
 
 /**
  * @brief logic writer for aw9523b pin
@@ -275,6 +278,6 @@ extern wws_logic_t *wws_aw9523b_logic_reader(void *inst);
  * @param logic
  * @return
  */
-extern void *wws_aw9523b_logic_writer(void *inst, wws_logic_t logic);
+extern void wws_aw9523b_logic_writer(void *inst, wws_logic_t logic);
 
 #endif /* ___WWS_AW9523B_H___ */
