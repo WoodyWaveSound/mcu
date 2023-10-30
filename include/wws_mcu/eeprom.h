@@ -10,6 +10,7 @@
 #include "typedef.h"
 #include "logic.h"
 #include "i2c.h"
+#include "memory.h"
 
 /**
  * @brief eeprom schema
@@ -109,5 +110,10 @@ extern wws_ret_t wws_eeprom_write(wws_eeprom_t        *eeprom,
  */
 extern wws_ret_t
 wws_eeprom_read(wws_eeprom_t *eeprom, unsigned int addr, unsigned int size, unsigned char *buf);
+
+/**
+ * @brief memory interface
+ */
+extern const wws_memory_inf_t wws_eeprom_memory_interface;
 
 #endif /* ___WWS_EEPROM_H___ */
