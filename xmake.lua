@@ -38,8 +38,8 @@ target("mcu")
     add_files("src/button.c")
 
     add_files("src/aw9523b.c")
-    add_files("src/encoder.c") 
- 
+    add_files("src/encoder.c")
+    add_files("src/eeprom.c")
 
 target("example")
     set_kind("binary")

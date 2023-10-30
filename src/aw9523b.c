@@ -40,7 +40,7 @@ reg_write(wws_aw9523b_t *dev, unsigned char reg_addr, unsigned char reg, unsigne
                       (wws_i2c_xfer_t[]){
                         { .ptr = &reg_addr, .size = 1, .xfer = WWS_XFER_WRITE },
                         { .ptr = &dev->regs[reg], .size = size, .xfer = WWS_XFER_WRITE },
-                        { 0 },
+                        {},
                       },
                       WWS_MS(100));
 }
@@ -67,9 +67,9 @@ void ___wws_aw9523b_input_service_callback(wws_phase_t on, wws_service_t *serv)
     wws_i2c_xfer(dev->bus,
                  addr(dev),
                  (wws_i2c_xfer_t[]){
-                   { .ptr = (unsigned char *){ 0x00 }, .size = 1, .xfer = WWS_XFER_WRITE },
+                   { .cptr = (const unsigned char *){ 0x00 }, .size = 1, .xfer = WWS_XFER_WRITE },
                    { .ptr = &dev->regs[0], .size = 2, .xfer = WWS_XFER_READ },
-                   { 0 },
+                   {},
                  },
                  WWS_MS(100));
 
@@ -94,14 +94,14 @@ wws_ret_t wws_aw9523b_init(wws_aw9523b_t *dev)
   if (ret != WWS_RET_OK) return ret;
 
   /** try to read id */
-  static unsigned char id_addr = 0x10;
-  unsigned char        id      = 0;
-  ret                          = wws_i2c_xfer(dev->bus,
+  static const unsigned char id_addr = 0x10;
+  unsigned char              id      = 0;
+  ret                                = wws_i2c_xfer(dev->bus,
                      addr(dev),
                      (wws_i2c_xfer_t[]){
-                       { .ptr = &id_addr, .size = 1, .xfer = WWS_XFER_WRITE },
+                       { .cptr = &id_addr, .size = 1, .xfer = WWS_XFER_WRITE },
                        { .ptr = &id, .size = 1, .xfer = WWS_XFER_READ },
-                       { 0 },
+                       {},
                      },
                      WWS_MS(100));
   if (ret != WWS_RET_OK) return ret;

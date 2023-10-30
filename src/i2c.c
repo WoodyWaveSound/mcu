@@ -57,7 +57,7 @@ wws_i2c_xfer(wws_i2c_t *i2c, unsigned short addr, wws_i2c_xfer_t xfers[], unsign
 
     if (xfers[i].xfer == WWS_XFER_WRITE) {
       for (int d = 0; d < xfers[i].size; d++) {
-        if ((ret = i2c->interface->put(i2c->inst, xfers[i].ptr[d], timeout)) != WWS_RET_OK) break;
+        if ((ret = i2c->interface->put(i2c->inst, xfers[i].cptr[d], timeout)) != WWS_RET_OK) break;
       }
     }
     else if (xfers[i].xfer == WWS_XFER_READ) {

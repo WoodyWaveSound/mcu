@@ -84,7 +84,11 @@ extern wws_ret_t wws_i2c_test_device(wws_i2c_t *i2c, unsigned short addr, unsign
  */
 typedef struct __wws_i2c_xfer_t
 {
-  unsigned char *ptr;
+  union
+  {
+    unsigned char       *ptr;
+    const unsigned char *cptr;
+  };
   unsigned short size;
   wws_xfer_t     xfer;
 } wws_i2c_xfer_t;

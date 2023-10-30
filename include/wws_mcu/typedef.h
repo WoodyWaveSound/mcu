@@ -112,6 +112,30 @@ typedef const char *const wws_xfer_t;
  */
 typedef const char *const wws_conf_t;
 
+/**
+ * @brief conv val into u8 array in big endian, max len = 4
+ */
+#define WWS_8BITS_BE(_len, _val)                                                                   \
+  {                                                                                                \
+    [(((_len) -4) > 0 ? ((_len) -4) : 0)] = (((_val) >> (8 * (4 - 1))) & 0xFF),                    \
+                                      [(((_len) -3) > 0 ? ((_len) -3) : 0)] =                      \
+                                        (((_val) >> (8 * (3 - 1))) & 0xFF),                        \
+                                      [(((_len) -2) > 0 ? ((_len) -2) : 0)] =                      \
+                                        (((_val) >> (8 * (2 - 1))) & 0xFF),                        \
+                                      [(((_len) -1) > 0 ? ((_len) -1) : 0)] =                      \
+                                        (((_val) >> (8 * (1 - 1))) & 0xFF),                        \
+  }
+
+/**
+ * @brief conv val into u8 array in little endian, max len = 4
+ */
+#define WWS_8BITS_LE(_len, _val)                                                                   \
+  {                                                                                                \
+    [(_len) -1] = 0, [((_len) > 3) ? 3 : 0] = (((_val) >> 24) & 0xFF),                             \
+            [((_len) > 2) ? 2 : 0] = (((_val) >> 16) & 0xFF),                                      \
+            [((_len) > 1) ? 1 : 0] = (((_val) >> 8) & 0xFF), [0] = ((_val) &0xFF)                  \
+  }
+
 #include "bitmask.h"
 
 #endif /* ___WWS_TYPEDEF_H___ */
