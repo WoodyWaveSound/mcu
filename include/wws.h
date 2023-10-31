@@ -36,5 +36,6 @@
 #include "wws_mcu/aw9523b.h"
 #include "wws_mcu/encoder.h"
 #include "wws_mcu/eeprom.h"
+#include "wws_mcu/ir.h"
 
 #endif /* ___WWS_WWS_H___ */

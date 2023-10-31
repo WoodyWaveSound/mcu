@@ -100,24 +100,24 @@ wws_eeprom_read(wws_eeprom_t *eeprom, unsigned int addr, unsigned int size, unsi
 
 static wws_ret_t mem_put8(void *inst, unsigned int addr, char data)
 {
-  return wws_eeprom_write(inst, addr, data, 1, 0);
+  return wws_eeprom_write(inst, addr, (unsigned char *) &data, 1, 0);
 }
 
 static wws_ret_t
 mem_write8(void *inst, unsigned int addr, const char *data, unsigned int len, unsigned int *written)
 {
-  return wws_eeprom_write(inst, addr, data, len, written);
+  return wws_eeprom_write(inst, addr, (const unsigned char *) data, len, written);
 }
 
 static wws_ret_t mem_get8(void *inst, unsigned int addr, char *buf)
 {
-  return wws_eeprom_read(inst, addr, 1, buf);
+  return wws_eeprom_read(inst, addr, 1, (unsigned char *) buf);
 }
 
 static wws_ret_t
 mem_read8(void *inst, unsigned int addr, unsigned int size, char *buf, unsigned int *buffered)
 {
-  return wws_eeprom_read(inst, addr, size, buf);
+  return wws_eeprom_read(inst, addr, size, (unsigned char *) buf);
 }
 
 const wws_memory_inf_t wws_eeprom_memory_interface = {
